@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Irrigatsiya va agrotexnologiyalar — AI Yordamchi</title>
+
+  <style>
+    :root{
+      --bg: #f3f8ff;
+      --card: #ffffff;
+      --border: rgba(0,0,0,.10);
+      --text: #0f172a;
+      --muted: rgba(15,23,42,.65);
+      --brand1: #0f4c81;
+      --brand2: #1677b8;
+      --btn: #0f4c81;
+      --btnHover: #0a3560;
+      --shadow: 0 14px 40px rgba(0,0,0,.10);
+      --radius: 16px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .page{
+      min-height:100%;
+      display:flex;
+      padding:14px;
+    }
+
+    .card{
+      width:100%;
+      max-width:720px;
+      margin:auto;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px;
+      background:linear-gradient(135deg, var(--brand1), var(--brand2));
+      color:#fff;
+    }
+
+    .logo{
+      width:44px;
+      height:44px;
+      border-radius:50%;
+      background:#fff;
+      padding:3px;
+      flex:0 0 auto;
+      object-fit:cover;
+    }
+
+    .title-wrap{ line-height:1.1; }
+
+    .title{
+      font-weight:800;
+      font-size:16px;
+      margin:0;
+    }
+
+    .subtitle{
+      margin:4px 0 0;
+      font-size:12px;
+      opacity:.9;
+    }
+
+    .content{
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .textarea{
+      width:100%;
+      min-height:92px;
+      max-height:160px;
+      padding:12px;
+      font-size:14px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      outline:none;
+      resize:vertical;
+      background:#fff;
+    }
+
+    .textarea:focus{
+      border-color:rgba(15,76,129,.45);
+      box-shadow:0 0 0 4px rgba(15,76,129,.12);
+    }
+
+    .btn{
+      width:100%;
+      padding:12px 14px;
+      background:var(--btn);
+      color:#fff;
+      border:0;
+      border-radius:12px;
+      font-weight:700;
+      font-size:15px;
+      cursor:pointer;
+      box-shadow:0 10px 26px rgba(15,76,129,.22);
+      transition: background .15s;
+    }
+
+    .btn:hover{ background:var(--btnHover); }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; }
+
+    .tip{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:-4px;
+    }
+
+    .history{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+      padding:10px;
+      font-size:14px;
+      line-height:1.45;
+      overflow:auto;
+      height:clamp(180px, 36vh, 320px);
+    }
+
+    .msg{
+      margin:8px 0;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    .who{ font-weight:800; }
+
+    .ai-wait{
+      color:var(--muted);
+      font-style:italic;
+    }
+
+    .footer{
+      padding:12px 14px 14px;
+      border-top:1px solid var(--border);
+      background:rgba(15,23,42,.02);
+    }
+
+    .note{
+      margin:0;
+      font-size:12.5px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .home{
+      display:inline-block;
+      margin-top:10px;
+      text-decoration:none;
+      font-weight:800;
+      color:var(--btn);
+    }
+
+    .home:hover{ text-decoration:underline; }
+
+    @media (max-width: 420px){
+      .page{ padding:10px; }
+      .header{ padding:12px; }
+      .logo{ width:40px; height:40px; }
+      .title{ font-size:15px; }
+      .content{ padding:12px; }
+      .history{ height:clamp(170px, 34vh, 280px); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="card">
+
+      <!-- Header -->
+      <div class="header">
+        <img
+          class="logo"
+          src="https://globalsciencehub.uz/public/logo.png"
+          alt="Global Science Hub logo"
+        />
+        <div class="title-wrap">
+          <p class="title">Irrigatsiya va agrotexnologiyalar — AI Yordamchi</p>
+          <p class="subtitle">Maqola topshirish, DOI, peer review, arxiv va boshqa savollar bo'yicha</p>
+        </div>
+      </div>
+
+      <!-- Chat area -->
+      <div class="content">
+        <textarea
+          id="userMessage"
+          class="textarea"
+          placeholder="Savolingizni shu yerga yozing..."
+          aria-label="Savol maydoni"
+        ></textarea>
+
+        <button class="btn" id="sendBtn" type="button">Yuborish</button>
+
+        <div class="tip">Enter — yuborish &nbsp;·&nbsp; Shift + Enter — yangi qator</div>
+
+        <div id="chat-history" class="history" aria-live="polite" aria-label="Suhbat tarixi"></div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p class="note">
+          <strong>Eslatma:</strong> AI yordamchi "Irrigatsiya va agrotexnologiyalar" jurnali bo'yicha
+          rasmiy ma'lumotlar asosida yo'naltiradi. Murakkab holatlarda jurnal tahririyati bilan
+          bog'lanish tavsiya etiladi: <strong>+998 77 303 65 64</strong> · <strong>@Sarmonov_4856</strong>
+        </p>
+        <a
+          class="home"
+          href="https://globalsciencehub.uz/index.php/IA/uz/index"
+          target="_top"
+          rel="noopener"
+        >← IA jurnal sahifasiga qaytish</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const messageBox = document.getElementById("userMessage");
+    const historyBox = document.getElementById("chat-history");
+    const sendBtn    = document.getElementById("sendBtn");
+
+    function escHtml(str) {
+      return String(str).replace(/[&<>"']/g, function(s) {
+        return { "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[s];
+      });
+    }
+
+    function appendMsg(who, text, cls) {
+      const p = document.createElement("p");
+      p.className = "msg" + (cls ? " " + cls : "");
+      p.innerHTML = "<span class=\"who\">" + escHtml(who) + ":</span> " + escHtml(text);
+      historyBox.appendChild(p);
+      historyBox.scrollTop = historyBox.scrollHeight;
+      return p;
+    }
+
+    async function sendToAI() {
+      const message = (messageBox.value || "").trim();
+      if (!message) return;
+
+      sendBtn.disabled = true;
+      appendMsg("Siz", message);
+      messageBox.value = "";
+      messageBox.focus();
+
+      const wait = document.createElement("p");
+      wait.className = "msg ai-wait";
+      wait.textContent = "AI javob yozmoqda...";
+      historyBox.appendChild(wait);
+      historyBox.scrollTop = historyBox.scrollHeight;
+
+      try {
+        const res = await fetch("https://globalsciencehub.uz/ai/ai.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: message,
+            journal: "IA",
+            lang: "uz"
+          })
+        });
+
+        const data = await res.json().catch(function() { return {}; });
+        wait.remove();
+
+        if (!res.ok) {
+          appendMsg("Xatolik", "Server javobi olinmadi. Qayta urinib ko'ring.");
+          return;
+        }
+
+        const reply = data.reply || "Javob olinmadi. Qayta urinib ko'ring.";
+        appendMsg("AI", reply);
+
+      } catch (err) {
+        wait.remove();
+        appendMsg("Xatolik", "Ulanishda muammo yuz berdi. Keyinroq urinib ko'ring.");
+        console.error(err);
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    sendBtn.addEventListener("click", sendToAI);
+
+    messageBox.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendToAI();
+      }
+    });
+  </script>
+</body>
+</html>
