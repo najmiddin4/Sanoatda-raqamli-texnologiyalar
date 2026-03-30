@@ -1,14 +1,22 @@
 from flask import Flask, request
 from telegram import Update
 from telegram.ext import Application
-import asyncio
 import os
 
-TOKEN = os.getenv("8773960266:AAFZK0rfvDZLBt0wxiJeGTC54ZLKb_TrIeI")
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "rum_secret_2026")
 
 app = Flask(__name__)
-ptb_app = Application.builder().token(TOKEN).build()
+
+_ptb_app = None
+
+def get_ptb_app():
+    global _ptb_app
+    if _ptb_app is None:
+        if not TOKEN:
+            raise RuntimeError("TELEGRAM_BOT_TOKEN muhit o'zgaruvchisi o'rnatilmagan")
+        _ptb_app = Application.builder().token(TOKEN).build()
+    return _ptb_app
 
 @app.route("/")
 def index():
@@ -17,7 +25,8 @@ def index():
 @app.route(f"/webhook/{WEBHOOK_SECRET}", methods=["POST"])
 def webhook():
     data = request.get_json(force=True)
-    update = Update.de_json(data, ptb_app.bot)
+    application = get_ptb_app()
+    update = Update.de_json(data, application.bot)
 
     chat_info = "no chat"
     if update.effective_chat:
