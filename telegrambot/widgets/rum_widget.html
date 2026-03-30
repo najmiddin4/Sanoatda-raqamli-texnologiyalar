@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Renaissance of Universal Mind — AI Yordamchi</title>
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --card: #ffffff;
+      --border: rgba(15, 23, 42, 0.12);
+      --text: #0f172a;
+      --muted: rgba(15, 23, 42, 0.68);
+      --brand1: #102542;
+      --brand2: #1f5b92;
+      --btn: #102542;
+      --btnHover: #0b1a2f;
+      --shadow: 0 18px 44px rgba(16, 37, 66, 0.14);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: linear-gradient(180deg, #eef3f8 0%, #f7f8fb 100%);
+      color: var(--text);
+    }
+
+    .page {
+      min-height: 100%;
+      display: flex;
+      padding: 16px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 760px;
+      margin: auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--brand1), var(--brand2));
+      color: #fff;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #fff;
+      padding: 4px;
+      flex: 0 0 auto;
+      object-fit: cover;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      font-size: 12px;
+      opacity: 0.92;
+      font-family: Arial, sans-serif;
+    }
+
+    .content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .textarea {
+      width: 100%;
+      min-height: 96px;
+      max-height: 180px;
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      outline: none;
+      resize: vertical;
+      background: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    .textarea:focus {
+      border-color: rgba(31, 91, 146, 0.45);
+      box-shadow: 0 0 0 4px rgba(31, 91, 146, 0.12);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--btn);
+      color: #fff;
+      border: 0;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      font-family: Arial, sans-serif;
+    }
+
+    .btn:hover { background: var(--btnHover); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .tip {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: -2px;
+      font-family: Arial, sans-serif;
+    }
+
+    .history {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: auto;
+      height: clamp(190px, 38vh, 340px);
+      font-family: Arial, sans-serif;
+    }
+
+    .msg {
+      margin: 8px 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .who { font-weight: 700; }
+
+    .ai-wait {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .footer {
+      padding: 14px 16px 16px;
+      border-top: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.02);
+    }
+
+    .note {
+      margin: 0;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-family: Arial, sans-serif;
+    }
+
+    .home {
+      display: inline-block;
+      margin-top: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      color: var(--btn);
+      font-family: Arial, sans-serif;
+    }
+
+    .home:hover { text-decoration: underline; }
+
+    @media (max-width: 420px) {
+      .page { padding: 10px; }
+      .header { padding: 14px; }
+      .logo { width: 42px; height: 42px; }
+      .title { font-size: 16px; }
+      .content { padding: 12px; }
+      .history { height: clamp(180px, 34vh, 280px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="header">
+        <img class="logo" src="https://rum-journal.com/public/logo.png" alt="RUM Journal logo" />
+        <div>
+          <p class="title">Renaissance of Universal Mind — AI Yordamchi</p>
+          <p class="subtitle">Maqola yuborish, jurnal talablari va tahririyat bilan bog'lanish bo'yicha tezkor yordam</p>
+        </div>
+      </div>
+
+      <div class="content">
+        <textarea id="userMessage" class="textarea" placeholder="Savolingizni shu yerga yozing..." aria-label="Savol maydoni"></textarea>
+        <button class="btn" id="sendBtn" type="button">Yuborish</button>
+        <div class="tip">Enter — yuborish · Shift + Enter — yangi qator</div>
+        <div id="chat-history" class="history" aria-live="polite" aria-label="Suhbat tarixi"></div>
+      </div>
+
+      <div class="footer">
+        <p class="note">
+          <strong>Eslatma:</strong> AI yordamchi <strong>Renaissance of Universal Mind</strong> jurnali bo'yicha rasmiy yo'naltiruvchi javoblar beradi.
+          Qo'shimcha aniqlashtirish uchun <strong>@najmiddin_b</strong> yoki <strong>+998 90 673 64 33</strong> orqali bog'lanishingiz mumkin.
+        </p>
+        <a class="home" href="https://rum-journal.com" target="_top" rel="noopener">← RUM Journal saytiga qaytish</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const messageBox = document.getElementById("userMessage");
+    const historyBox = document.getElementById("chat-history");
+    const sendBtn = document.getElementById("sendBtn");
+
+    function escHtml(str) {
+      return String(str).replace(/[&<>"']/g, function (s) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[s];
+      });
+    }
+
+    function appendMsg(who, text, cls) {
+      const p = document.createElement("p");
+      p.className = "msg" + (cls ? " " + cls : "");
+      p.innerHTML = "<span class=\"who\">" + escHtml(who) + ":</span> " + escHtml(text);
+      historyBox.appendChild(p);
+      historyBox.scrollTop = historyBox.scrollHeight;
+      return p;
+    }
+
+    async function sendToAI() {
+      const message = (messageBox.value || "").trim();
+      if (!message) return;
+
+      sendBtn.disabled = true;
+      appendMsg("Siz", message);
+      messageBox.value = "";
+      messageBox.focus();
+
+      const wait = document.createElement("p");
+      wait.className = "msg ai-wait";
+      wait.textContent = "AI javob yozmoqda...";
+      historyBox.appendChild(wait);
+      historyBox.scrollTop = historyBox.scrollHeight;
+
+      try {
+        const res = await fetch("https://rum-journal.com/ai/ai.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: message,
+            journal: "DEFAULT",
+            lang: "uz"
+          })
+        });
+
+        const data = await res.json().catch(function () { return {}; });
+        wait.remove();
+
+        if (!res.ok) {
+          appendMsg("Xatolik", "Server javobi olinmadi. Qayta urinib ko'ring.");
+          return;
+        }
+
+        const reply = data.reply || "Javob olinmadi. Qayta urinib ko'ring.";
+        appendMsg("AI", reply);
+      } catch (err) {
+        wait.remove();
+        appendMsg("Xatolik", "Ulanishda muammo yuz berdi. Keyinroq urinib ko'ring.");
+        console.error(err);
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    sendBtn.addEventListener("click", sendToAI);
+    messageBox.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendToAI();
+      }
+    });
+  </script>
+</body>
+</html>
