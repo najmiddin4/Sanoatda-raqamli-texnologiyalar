@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import Application
 import os
 
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TOKEN = os.getenv("BOT_TOKEN")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "rum_secret_2026")
 
 app = Flask(__name__)
@@ -14,7 +14,7 @@ def get_ptb_app():
     global _ptb_app
     if _ptb_app is None:
         if not TOKEN:
-            raise RuntimeError("TELEGRAM_BOT_TOKEN muhit o'zgaruvchisi o'rnatilmagan")
+            raise RuntimeError("BOT_TOKEN muhit o'zgaruvchisi o'rnatilmagan")
         _ptb_app = Application.builder().token(TOKEN).build()
     return _ptb_app
 
