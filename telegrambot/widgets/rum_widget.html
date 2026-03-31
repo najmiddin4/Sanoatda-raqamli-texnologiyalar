@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Renaissance of Universal Mind — AI Assistant</title>
+  <style>
+    :root {
+      --ink: #0e1a2b;
+      --muted: #586579;
+      --line: rgba(14, 26, 43, 0.12);
+      --paper: rgba(255, 255, 255, 0.88);
+      --panel: #ffffff;
+      --brand-1: #0f2747;
+      --brand-2: #245f97;
+      --brand-3: #d7e8f8;
+      --accent: #c08a2f;
+      --shadow: 0 24px 70px rgba(15, 39, 71, 0.18);
+      --radius-xl: 28px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Georgia", "Times New Roman", serif;
+      background:
+        radial-gradient(circle at top left, rgba(36, 95, 151, 0.16), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(192, 138, 47, 0.14), transparent 28%),
+        linear-gradient(180deg, #eef4f8 0%, #f7f8fb 46%, #edf2f7 100%);
+    }
+
+    .shell {
+      min-height: 100%;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .frame {
+      width: min(100%, 860px);
+      background: var(--paper);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .frame::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.28), transparent 38%),
+        linear-gradient(180deg, transparent, rgba(15,39,71,0.03));
+      pointer-events: none;
+    }
+
+    .hero {
+      position: relative;
+      padding: 28px 28px 20px;
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(15, 39, 71, 0.98), rgba(36, 95, 151, 0.96)),
+        url("https://rum-journal.com/public/journals/1/Banner01.jpg") center/cover;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -55% auto;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(255,255,255,0.22), transparent 62%);
+      pointer-events: none;
+    }
+
+    .hero-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .crest {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.96);
+      padding: 6px;
+      box-shadow: inset 0 0 0 1px rgba(15, 39, 71, 0.08);
+      object-fit: contain;
+      flex: 0 0 auto;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      font: 700 11px/1.2 Arial, sans-serif;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.72);
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 30px);
+      line-height: 1.05;
+      letter-spacing: 0.01em;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      max-width: 640px;
+      font: 400 14px/1.55 Arial, sans-serif;
+      color: rgba(255,255,255,0.86);
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      font: 700 12px/1 Arial, sans-serif;
+      letter-spacing: 0.04em;
+    }
+
+    .body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 250px;
+      gap: 18px;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .chat-panel,
+    .side-panel {
+      background: rgba(255,255,255,0.86);
+      border: 1px solid rgba(14, 26, 43, 0.08);
+      border-radius: 22px;
+      box-shadow: 0 10px 30px rgba(15, 39, 71, 0.06);
+    }
+
+    .chat-panel {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .composer {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 128px;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .textarea {
+      width: 100%;
+      min-height: 110px;
+      max-height: 190px;
+      resize: vertical;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #f9fbfd);
+      padding: 16px 18px;
+      color: var(--ink);
+      font: 400 14px/1.6 Arial, sans-serif;
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+
+    .textarea:focus {
+      border-color: rgba(36, 95, 151, 0.45);
+      box-shadow: 0 0 0 5px rgba(36, 95, 151, 0.10);
+      transform: translateY(-1px);
+    }
+
+    .send-btn {
+      min-height: 54px;
+      border: 0;
+      border-radius: 18px;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+      box-shadow: 0 14px 30px rgba(15, 39, 71, 0.22);
+      font: 700 15px/1 Arial, sans-serif;
+      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+    }
+
+    .send-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 34px rgba(15, 39, 71, 0.28);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .hint {
+      margin: -2px 2px 0;
+      color: var(--muted);
+      font: 600 11px/1.4 Arial, sans-serif;
+      letter-spacing: 0.02em;
+    }
+
+    .history {
+      min-height: 290px;
+      max-height: 390px;
+      overflow: auto;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      scrollbar-width: thin;
+    }
+
+    .bubble {
+      max-width: 88%;
+      padding: 12px 14px;
+      border-radius: 18px;
+      font: 400 14px/1.55 Arial, sans-serif;
+      white-space: pre-wrap;
+      word-break: break-word;
+      animation: reveal .22s ease;
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #15345a, #235f96);
+      color: #fff;
+      border-bottom-right-radius: 6px;
+      box-shadow: 0 12px 24px rgba(15, 39, 71, 0.18);
+    }
+
+    .bubble.ai {
+      align-self: flex-start;
+      background: #f6f9fc;
+      color: var(--ink);
+      border: 1px solid rgba(14, 26, 43, 0.08);
+      border-bottom-left-radius: 6px;
+    }
+
+    .bubble.error {
+      align-self: flex-start;
+      background: #fff4f4;
+      border: 1px solid rgba(178, 53, 53, 0.14);
+      color: #8f1f1f;
+    }
+
+    .bubble.waiting {
+      align-self: flex-start;
+      color: var(--muted);
+      background: rgba(215, 232, 248, 0.46);
+      border: 1px dashed rgba(36, 95, 151, 0.18);
+      font-style: italic;
+    }
+
+    .side-panel {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .side-title {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.15;
+    }
+
+    .side-copy {
+      margin: 0;
+      color: var(--muted);
+      font: 400 13px/1.6 Arial, sans-serif;
+    }
+
+    .info-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .info-card {
+      padding: 12px 13px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffffff, #f8fbfd);
+      border: 1px solid rgba(14, 26, 43, 0.08);
+    }
+
+    .info-label {
+      margin: 0 0 6px;
+      color: var(--muted);
+      font: 700 10px/1.2 Arial, sans-serif;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .info-value,
+    .info-link {
+      color: var(--ink);
+      text-decoration: none;
+      font: 700 13px/1.45 Arial, sans-serif;
+    }
+
+    .info-link:hover {
+      color: var(--brand-2);
+    }
+
+    .return-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--brand-1);
+      font: 700 13px/1.2 Arial, sans-serif;
+    }
+
+    .return-link:hover {
+      color: var(--brand-2);
+    }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 880px) {
+      .body {
+        grid-template-columns: 1fr;
+      }
+
+      .side-panel {
+        order: 2;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .shell {
+        padding: 10px;
+      }
+
+      .hero,
+      .body {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .composer {
+        grid-template-columns: 1fr;
+      }
+
+      .send-btn {
+        width: 100%;
+      }
+
+      .bubble {
+        max-width: 96%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="frame">
+      <section class="hero">
+        <div class="hero-top">
+          <img class="crest" src="https://rum-journal.com/public/logo.png" alt="RUM Journal logo" />
+          <div>
+            <p class="eyebrow" id="eyebrowText"></p>
+            <h1 class="title">Renaissance of Universal Mind</h1>
+            <p class="subtitle" id="subtitleText"></p>
+          </div>
+        </div>
+        <div class="hero-badges">
+          <span class="badge" id="badgeOne"></span>
+          <span class="badge" id="badgeTwo"></span>
+          <span class="badge" id="badgeThree"></span>
+        </div>
+      </section>
+
+      <section class="body">
+        <div class="chat-panel">
+          <div class="composer">
+            <textarea id="userMessage" class="textarea" aria-label="Message field"></textarea>
+            <button class="send-btn" id="sendBtn" type="button"></button>
+          </div>
+          <div class="hint" id="hintText"></div>
+          <div id="chat-history" class="history" aria-live="polite"></div>
+        </div>
+
+        <aside class="side-panel">
+          <div>
+            <h2 class="side-title" id="sourcesTitle"></h2>
+            <p class="side-copy" id="sourcesCopy"></p>
+          </div>
+
+          <div class="info-stack">
+            <div class="info-card">
+              <p class="info-label" id="siteLabel"></p>
+              <a class="info-link" href="https://rum-journal.com" target="_top" rel="noopener">rum-journal.com</a>
+            </div>
+            <div class="info-card">
+              <p class="info-label" id="telegramLabel"></p>
+              <a class="info-link" href="https://t.me/rum_journal" target="_blank" rel="noopener">@rum_journal</a>
+            </div>
+            <div class="info-card">
+              <p class="info-label" id="contactLabel"></p>
+              <div class="info-value">info@rum-journal.com</div>
+              <div class="info-value">+998 90 673 64 33</div>
+            </div>
+          </div>
+
+          <a class="return-link" id="returnLink" href="https://rum-journal.com" target="_top" rel="noopener"></a>
+        </aside>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const I18N = {
+      uz: {
+        pageTitle: "Renaissance of Universal Mind — AI Yordamchi",
+        eyebrow: "RUM Journal Assistant",
+        subtitle: "Maqola yuborish, peer review, jurnal qoidalari va aloqa bo'yicha tezkor, rasmiy yo'naltiruvchi yordam.",
+        badgeOne: "Open Access",
+        badgeTwo: "Double-blind Review",
+        badgeThree: "Editorial Guidance",
+        placeholder: "Savolingizni shu yerga yozing...",
+        send: "Yuborish",
+        hint: "Enter — yuborish, Shift + Enter — yangi qator",
+        sourcesTitle: "Rasmiy manbalar",
+        sourcesCopy: "AI yordamchi faqat jurnalning rasmiy sahifalariga tayangan holda yo'naltiruvchi javob beradi.",
+        siteLabel: "Sayt",
+        telegramLabel: "Telegram",
+        contactLabel: "Aloqa",
+        returnText: "← RUM Journal saytiga qaytish",
+        historyLabel: "Suhbat tarixi",
+        inputAria: "Savol maydoni",
+        you: "Siz",
+        ai: "AI",
+        error: "Xatolik",
+        waiting: "Javob tayyorlanmoqda...",
+        serverError: "Server javobi olinmadi. Qayta urinib ko'ring.",
+        emptyReply: "Javob olinmadi. Qayta urinib ko'ring.",
+        connectionError: "Ulanishda muammo yuz berdi. Keyinroq urinib ko'ring."
+      },
+      ru: {
+        pageTitle: "Renaissance of Universal Mind — AI Ассистент",
+        eyebrow: "RUM Journal Assistant",
+        subtitle: "Быстрая официальная помощь по подаче статьи, peer review, правилам журнала и контактам редакции.",
+        badgeOne: "Open Access",
+        badgeTwo: "Double-blind Review",
+        badgeThree: "Editorial Guidance",
+        placeholder: "Напишите ваш вопрос здесь...",
+        send: "Отправить",
+        hint: "Enter — отправить, Shift + Enter — новая строка",
+        sourcesTitle: "Официальные источники",
+        sourcesCopy: "AI ассистент даёт ориентирующие ответы только на основе официальных страниц журнала.",
+        siteLabel: "Сайт",
+        telegramLabel: "Telegram",
+        contactLabel: "Контакты",
+        returnText: "← Вернуться на сайт RUM Journal",
+        historyLabel: "История чата",
+        inputAria: "Поле вопроса",
+        you: "Вы",
+        ai: "AI",
+        error: "Ошибка",
+        waiting: "Готовлю ответ...",
+        serverError: "Не удалось получить ответ от сервера. Попробуйте ещё раз.",
+        emptyReply: "Ответ не получен. Попробуйте ещё раз.",
+        connectionError: "Проблема с подключением. Попробуйте позже."
+      },
+      en: {
+        pageTitle: "Renaissance of Universal Mind — AI Assistant",
+        eyebrow: "RUM Journal Assistant",
+        subtitle: "Fast official guidance on article submission, peer review, journal rules, and editorial contacts.",
+        badgeOne: "Open Access",
+        badgeTwo: "Double-blind Review",
+        badgeThree: "Editorial Guidance",
+        placeholder: "Type your question here...",
+        send: "Send",
+        hint: "Enter — send, Shift + Enter — new line",
+        sourcesTitle: "Official Sources",
+        sourcesCopy: "The AI assistant provides guidance only based on the journal's official pages.",
+        siteLabel: "Website",
+        telegramLabel: "Telegram",
+        contactLabel: "Contact",
+        returnText: "← Return to the RUM Journal website",
+        historyLabel: "Chat history",
+        inputAria: "Question field",
+        you: "You",
+        ai: "AI",
+        error: "Error",
+        waiting: "Preparing a reply...",
+        serverError: "The server response could not be retrieved. Please try again.",
+        emptyReply: "No reply was received. Please try again.",
+        connectionError: "Connection problem. Please try again later."
+      }
+    };
+
+    function detectLang() {
+      const htmlLang = (document.documentElement.lang || "").toLowerCase();
+      if (htmlLang.startsWith("ru")) return "ru";
+      if (htmlLang.startsWith("en")) return "en";
+
+      const params = new URLSearchParams(window.location.search);
+      const queryLang = (params.get("lang") || "").toLowerCase();
+      if (queryLang === "ru" || queryLang === "en" || queryLang === "uz") return queryLang;
+
+      const path = window.location.pathname.toLowerCase();
+      if (path.includes("/ru/")) return "ru";
+      if (path.includes("/en/")) return "en";
+      return "uz";
+    }
+
+    const lang = detectLang();
+    const t = I18N[lang] || I18N.uz;
+
+    document.documentElement.lang = lang;
+    document.title = t.pageTitle;
+    document.getElementById("eyebrowText").textContent = t.eyebrow;
+    document.getElementById("subtitleText").textContent = t.subtitle;
+    document.getElementById("badgeOne").textContent = t.badgeOne;
+    document.getElementById("badgeTwo").textContent = t.badgeTwo;
+    document.getElementById("badgeThree").textContent = t.badgeThree;
+    document.getElementById("userMessage").placeholder = t.placeholder;
+    document.getElementById("userMessage").setAttribute("aria-label", t.inputAria);
+    document.getElementById("sendBtn").textContent = t.send;
+    document.getElementById("hintText").textContent = t.hint;
+    document.getElementById("sourcesTitle").textContent = t.sourcesTitle;
+    document.getElementById("sourcesCopy").textContent = t.sourcesCopy;
+    document.getElementById("siteLabel").textContent = t.siteLabel;
+    document.getElementById("telegramLabel").textContent = t.telegramLabel;
+    document.getElementById("contactLabel").textContent = t.contactLabel;
+    document.getElementById("returnLink").textContent = t.returnText;
+    document.getElementById("chat-history").setAttribute("aria-label", t.historyLabel);
+
+    const messageBox = document.getElementById("userMessage");
+    const historyBox = document.getElementById("chat-history");
+    const sendBtn = document.getElementById("sendBtn");
+
+    function escHtml(str) {
+      return String(str).replace(/[&<>"']/g, function (s) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[s];
+      });
+    }
+
+    function appendMsg(who, text, cls) {
+      const p = document.createElement("div");
+      p.className = "bubble " + (cls || "ai");
+      p.innerHTML = "<strong>" + escHtml(who) + "</strong><br>" + escHtml(text);
+      historyBox.appendChild(p);
+      historyBox.scrollTop = historyBox.scrollHeight;
+      return p;
+    }
+
+    async function sendToAI() {
+      const message = (messageBox.value || "").trim();
+      if (!message) return;
+
+      sendBtn.disabled = true;
+      appendMsg(t.you, message, "user");
+      messageBox.value = "";
+      messageBox.focus();
+
+      const wait = appendMsg(t.ai, t.waiting, "waiting");
+
+      try {
+        const res = await fetch("https://rum-journal.com/ai/ai.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: message,
+            journal: "RUM",
+            lang: lang
+          })
+        });
+
+        const data = await res.json().catch(function () { return {}; });
+        wait.remove();
+
+        if (!res.ok) {
+          appendMsg(t.error, t.serverError, "error");
+          return;
+        }
+
+        const reply = data.reply || t.emptyReply;
+        appendMsg(t.ai, reply, "ai");
+      } catch (err) {
+        wait.remove();
+        appendMsg(t.error, t.connectionError, "error");
+        console.error(err);
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    sendBtn.addEventListener("click", sendToAI);
+    messageBox.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendToAI();
+      }
+    });
+  </script>
+</body>
+</html>
