@@ -2,6 +2,7 @@ from flask import Flask, jsonify, make_response, request
 import html
 import json
 import os
+import re
 import requests as req
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -17,12 +18,14 @@ ALLOWED_ORIGINS = {
     "https://rum-journal.com",
     "http://rum-journal.com",
 }
+USER_ID_PATTERN = re.compile(r"USER_ID:(\d+)")
 
 app = Flask(__name__)
 user_states = {}
 
 STATE_SELECT_LANG = "select_lang"
 STATE_MAIN_MENU = "main_menu"
+STATE_AI_CHAT = "ai_chat"
 STATE_ARTICLE_TITLE = "article_title"
 STATE_ARTICLE_AUTHORS = "article_authors"
 STATE_ARTICLE_ANNOTATION = "article_annotation"
@@ -35,9 +38,14 @@ TEXTS = {
         "welcome": "👋 Assalomu alaykum! RUM Publishing botiga xush kelibsiz.\n\nIltimos, tilni tanlang:",
         "main_menu": "📋 Asosiy menyu:",
         "submit_article": "📝 Maqola yuborish",
+        "ai_assistant": "🤖 AI yordamchi",
         "rules": "📋 Qoidalar",
         "contact": "📞 Aloqa",
+        "payment": "💳 To'lov",
+        "plagiarism": "🧪 Plagiatga tekshirish",
         "change_lang": "🌐 Tilni o'zgartirish",
+        "back_menu": "⬅️ Asosiy menyu",
+        "ask_ai": "🤖 Savolingizni yozing. AI yordamchi javob beradi.",
         "ask_title": "📝 Maqola nomini kiriting:",
         "ask_authors": "👥 Mualliflar ismini kiriting (vergul bilan ajrating):",
         "ask_annotation": "📄 Annotatsiyani kiriting:",
@@ -59,6 +67,16 @@ TEXTS = {
             "• Barcha maqolalar double-blind peer review asosida ko'rib chiqiladi\n"
             "• Batafsil talablar: https://rum-journal.com/index.php/RUM/en/about/submissions"
         ),
+        "payment_text": (
+            "💳 <b>To'lov</b>\n\n"
+            "To'lov sahifasi quyidagi manzilda joylashgan:\n"
+            "https://rum-journal.com/payment"
+        ),
+        "plagiarism_text": (
+            "🧪 <b>Plagiatga tekshirish</b>\n\n"
+            "Plagiatga tekshirish sahifasi quyidagi manzilda joylashgan:\n"
+            "https://rum-journal.com/plagiarism"
+        ),
         "skip": "⏭ O'tkazib yuborish",
         "cancel": "❌ Bekor qilish",
         "submitted": "✅ Maqolangiz muvaffaqiyatli yuborildi! Tez orada javob beramiz.",
@@ -66,6 +84,8 @@ TEXTS = {
         "article_file_caption": "📎 <b>Maqola fayli</b>",
         "plagiat_caption": "📊 <b>Plagiat hisoboti</b>",
         "contact_message_caption": "📩 <b>Foydalanuvchi murojaati</b>",
+        "admin_reply_sent": "✅ Javob foydalanuvchiga yuborildi.",
+        "admin_reply_failed": "❌ Foydalanuvchi ID topilmadi. Summary xabariga reply qiling.",
         "ai_unavailable": "AI xizmati hozircha sozlanmagan. Keyinroq urinib ko'ring.",
         "ai_connection_error": "Ulanishda muammo yuz berdi. Keyinroq qayta urinib ko'ring.",
         "ai_service_error": "AI xizmatidan javob olinmadi. Keyinroq qayta urinib ko'ring.",
@@ -75,9 +95,14 @@ TEXTS = {
         "welcome": "👋 Добро пожаловать в бот RUM Publishing!\n\nПожалуйста, выберите язык:",
         "main_menu": "📋 Главное меню:",
         "submit_article": "📝 Отправить статью",
+        "ai_assistant": "🤖 AI помощник",
         "rules": "📋 Правила",
         "contact": "📞 Контакты",
+        "payment": "💳 Оплата",
+        "plagiarism": "🧪 Проверка на плагиат",
         "change_lang": "🌐 Сменить язык",
+        "back_menu": "⬅️ Главное меню",
+        "ask_ai": "🤖 Напишите ваш вопрос. AI помощник ответит.",
         "ask_title": "📝 Введите название статьи:",
         "ask_authors": "👥 Введите имена авторов (через запятую):",
         "ask_annotation": "📄 Введите аннотацию:",
@@ -99,6 +124,16 @@ TEXTS = {
             "• Все статьи проходят double-blind peer review\n"
             "• Подробные требования: https://rum-journal.com/index.php/RUM/en/about/submissions"
         ),
+        "payment_text": (
+            "💳 <b>Оплата</b>\n\n"
+            "Страница оплаты доступна по адресу:\n"
+            "https://rum-journal.com/payment"
+        ),
+        "plagiarism_text": (
+            "🧪 <b>Проверка на плагиат</b>\n\n"
+            "Страница проверки на плагиат доступна по адресу:\n"
+            "https://rum-journal.com/plagiarism"
+        ),
         "skip": "⏭ Пропустить",
         "cancel": "❌ Отмена",
         "submitted": "✅ Ваша статья успешно отправлена! Мы свяжемся с вами в ближайшее время.",
@@ -106,6 +141,8 @@ TEXTS = {
         "article_file_caption": "📎 <b>Файл статьи</b>",
         "plagiat_caption": "📊 <b>Отчёт о плагиате</b>",
         "contact_message_caption": "📩 <b>Сообщение пользователя</b>",
+        "admin_reply_sent": "✅ Ответ отправлен пользователю.",
+        "admin_reply_failed": "❌ ID пользователя не найден. Ответьте на summary сообщение.",
         "ai_unavailable": "AI сервис пока не настроен. Попробуйте позже.",
         "ai_connection_error": "Проблема с подключением. Попробуйте позже.",
         "ai_service_error": "Ответ от AI сервиса не получен. Попробуйте позже.",
@@ -115,9 +152,14 @@ TEXTS = {
         "welcome": "👋 Welcome to the RUM Publishing bot!\n\nPlease select your language:",
         "main_menu": "📋 Main menu:",
         "submit_article": "📝 Submit Article",
+        "ai_assistant": "🤖 AI assistant",
         "rules": "📋 Rules",
         "contact": "📞 Contact",
+        "payment": "💳 Payment",
+        "plagiarism": "🧪 Plagiarism Check",
         "change_lang": "🌐 Change Language",
+        "back_menu": "⬅️ Main menu",
+        "ask_ai": "🤖 Type your question. The AI assistant will reply.",
         "ask_title": "📝 Enter the article title:",
         "ask_authors": "👥 Enter author names (comma separated):",
         "ask_annotation": "📄 Enter the abstract:",
@@ -139,6 +181,16 @@ TEXTS = {
             "• All articles are reviewed through double-blind peer review\n"
             "• Detailed requirements: https://rum-journal.com/index.php/RUM/en/about/submissions"
         ),
+        "payment_text": (
+            "💳 <b>Payment</b>\n\n"
+            "The payment page is available at:\n"
+            "https://rum-journal.com/payment"
+        ),
+        "plagiarism_text": (
+            "🧪 <b>Plagiarism Check</b>\n\n"
+            "The plagiarism check page is available at:\n"
+            "https://rum-journal.com/plagiarism"
+        ),
         "skip": "⏭ Skip",
         "cancel": "❌ Cancel",
         "submitted": "✅ Your article has been submitted successfully. We will contact you soon.",
@@ -146,6 +198,8 @@ TEXTS = {
         "article_file_caption": "📎 <b>Article file</b>",
         "plagiat_caption": "📊 <b>Plagiarism report</b>",
         "contact_message_caption": "📩 <b>User message</b>",
+        "admin_reply_sent": "✅ Reply sent to the user.",
+        "admin_reply_failed": "❌ User ID not found. Reply to the summary message.",
         "ai_unavailable": "The AI service is not configured yet. Please try again later.",
         "ai_connection_error": "Connection problem. Please try again later.",
         "ai_service_error": "No response from the AI service. Please try again later.",
@@ -166,6 +220,13 @@ def normalize_journal(value):
 
 def escape_text(value):
     return html.escape(str(value or "-"), quote=False)
+
+
+def admin_group_chat_id():
+    try:
+        return int(ADMIN_GROUP_ID) if ADMIN_GROUP_ID else None
+    except ValueError:
+        return None
 
 
 def get_prompt_candidates(journal, lang):
@@ -239,7 +300,7 @@ def api(method, **kwargs):
     )
 
 
-def send_msg(chat_id, text, keyboard=None):
+def send_msg(chat_id, text, keyboard=None, reply_to_message_id=None):
     kwargs = {
         "chat_id": chat_id,
         "text": text,
@@ -248,15 +309,19 @@ def send_msg(chat_id, text, keyboard=None):
     }
     if keyboard:
         kwargs["reply_markup"] = keyboard
-    api("sendMessage", **kwargs)
+    if reply_to_message_id:
+        kwargs["reply_to_message_id"] = reply_to_message_id
+    return api("sendMessage", **kwargs)
 
 
-def send_doc(chat_id, file_id, caption=None):
+def send_doc(chat_id, file_id, caption=None, reply_to_message_id=None):
     kwargs = {"chat_id": chat_id, "document": file_id}
     if caption:
         kwargs["caption"] = caption
         kwargs["parse_mode"] = "HTML"
-    api("sendDocument", **kwargs)
+    if reply_to_message_id:
+        kwargs["reply_to_message_id"] = reply_to_message_id
+    return api("sendDocument", **kwargs)
 
 
 def lang_keyboard():
@@ -273,8 +338,9 @@ def menu_keyboard(lang):
     t = TEXTS[lang]
     return {
         "keyboard": [
-            [{"text": t["submit_article"]}],
+            [{"text": t["submit_article"]}, {"text": t["ai_assistant"]}],
             [{"text": t["rules"]}, {"text": t["contact"]}],
+            [{"text": t["payment"]}, {"text": t["plagiarism"]}],
             [{"text": t["change_lang"]}],
         ],
         "resize_keyboard": True,
@@ -294,6 +360,14 @@ def cancel_keyboard(lang, include_skip=False):
     }
 
 
+def ai_keyboard(lang):
+    return {
+        "keyboard": [[{"text": TEXTS[lang]["back_menu"]}]],
+        "resize_keyboard": True,
+        "persistent": True,
+    }
+
+
 def get_state(user_id):
     if user_id not in user_states:
         user_states[user_id] = {"lang": "uz", "state": STATE_SELECT_LANG, "data": {}}
@@ -306,6 +380,10 @@ def set_main_menu(chat_id, user_id):
     send_msg(chat_id, TEXTS[lang]["main_menu"], keyboard=menu_keyboard(lang))
 
 
+def user_marker(user_id):
+    return f"USER_ID:{user_id}"
+
+
 def build_admin_submission(user_id, username, data, lang):
     lang_names = {"uz": "O'zbek 🇺🇿", "ru": "Русский 🇷🇺", "en": "English 🇬🇧"}
     username_text = f"@{username}" if username else "—"
@@ -313,6 +391,7 @@ def build_admin_submission(user_id, username, data, lang):
         f"{TEXTS[lang]['admin_header']}\n\n"
         f"👤 <b>Muallif:</b> {escape_text(username_text)}\n"
         f"🆔 <b>ID:</b> <code>{user_id}</code>\n"
+        f"🏷 <code>{user_marker(user_id)}</code>\n"
         f"🌐 <b>Til:</b> {escape_text(lang_names.get(lang, lang))}\n\n"
         f"📝 <b>Maqola nomi:</b>\n{escape_text(data.get('title'))}\n\n"
         f"👥 <b>Mualliflar:</b>\n{escape_text(data.get('authors'))}\n\n"
@@ -320,9 +399,10 @@ def build_admin_submission(user_id, username, data, lang):
     )
 
 
-def build_file_caption(prefix, data):
+def build_file_caption(prefix, data, user_id):
     return (
         f"{prefix}\n\n"
+        f"<code>{user_marker(user_id)}</code>\n"
         f"<b>Maqola:</b> {escape_text(data.get('title'))}\n"
         f"<b>Mualliflar:</b> {escape_text(data.get('authors'))}"
     )
@@ -335,25 +415,61 @@ def build_contact_forward(user_id, username, message, lang):
         f"{TEXTS[lang]['contact_message_caption']}\n\n"
         f"👤 <b>Foydalanuvchi:</b> {escape_text(username_text)}\n"
         f"🆔 <b>ID:</b> <code>{user_id}</code>\n"
+        f"🏷 <code>{user_marker(user_id)}</code>\n"
         f"🌐 <b>Til:</b> {escape_text(lang_names.get(lang, lang))}\n\n"
         f"💬 <b>Xabar:</b>\n{escape_text(message)}"
     )
 
 
 def forward_submission_to_admin(user_id, username, data, lang):
-    if not ADMIN_GROUP_ID:
+    group_id = admin_group_chat_id()
+    if not group_id:
         return
-    send_msg(ADMIN_GROUP_ID, build_admin_submission(user_id, username, data, lang))
+    send_msg(group_id, build_admin_submission(user_id, username, data, lang))
     if data.get("article_file"):
-        send_doc(ADMIN_GROUP_ID, data["article_file"], caption=build_file_caption(TEXTS[lang]["article_file_caption"], data))
+        send_doc(group_id, data["article_file"], caption=build_file_caption(TEXTS[lang]["article_file_caption"], data, user_id))
     if data.get("plagiat_file"):
-        send_doc(ADMIN_GROUP_ID, data["plagiat_file"], caption=build_file_caption(TEXTS[lang]["plagiat_caption"], data))
+        send_doc(group_id, data["plagiat_file"], caption=build_file_caption(TEXTS[lang]["plagiat_caption"], data, user_id))
 
 
 def forward_contact_to_admin(user_id, username, message, lang):
-    if not ADMIN_GROUP_ID:
+    group_id = admin_group_chat_id()
+    if not group_id:
         return
-    send_msg(ADMIN_GROUP_ID, build_contact_forward(user_id, username, message, lang))
+    send_msg(group_id, build_contact_forward(user_id, username, message, lang))
+
+
+def extract_user_id_from_message(message):
+    for field in (message.get("text"), message.get("caption")):
+        if not field:
+            continue
+        match = USER_ID_PATTERN.search(field)
+        if match:
+            return int(match.group(1))
+    return None
+
+
+def handle_admin_reply(message):
+    reply_to = message.get("reply_to_message") or {}
+    target_user_id = extract_user_id_from_message(reply_to)
+    admin_chat_id = message.get("chat", {}).get("id")
+    if not target_user_id:
+        send_msg(admin_chat_id, TEXTS["uz"]["admin_reply_failed"], reply_to_message_id=message.get("message_id"))
+        return
+
+    text = (message.get("text") or "").strip()
+    caption = (message.get("caption") or "").strip()
+    document = message.get("document", {}).get("file_id") if message.get("document") else None
+
+    if text:
+        send_msg(target_user_id, text)
+    elif document:
+        send_doc(target_user_id, document, caption=caption or None)
+    else:
+        send_msg(admin_chat_id, TEXTS["uz"]["admin_reply_failed"], reply_to_message_id=message.get("message_id"))
+        return
+
+    send_msg(admin_chat_id, TEXTS["uz"]["admin_reply_sent"], reply_to_message_id=message.get("message_id"))
 
 
 def handle_callback(chat_id, user_id, cb_data):
@@ -373,7 +489,7 @@ def handle_text_message(chat_id, user_id, username, text):
         send_msg(chat_id, TEXTS["uz"]["welcome"], keyboard=lang_keyboard())
         return
 
-    if text == t["cancel"]:
+    if text in {t["cancel"], t["back_menu"]}:
         user_states[user_id]["data"] = {}
         set_main_menu(chat_id, user_id)
         return
@@ -384,6 +500,10 @@ def handle_text_message(chat_id, user_id, username, text):
             user_states[user_id]["state"] = STATE_ARTICLE_TITLE
             send_msg(chat_id, t["ask_title"], keyboard=cancel_keyboard(lang))
             return
+        if text == t["ai_assistant"]:
+            user_states[user_id]["state"] = STATE_AI_CHAT
+            send_msg(chat_id, t["ask_ai"], keyboard=ai_keyboard(lang))
+            return
         if text == t["rules"]:
             send_msg(chat_id, t["rules_text"], keyboard=menu_keyboard(lang))
             return
@@ -391,10 +511,19 @@ def handle_text_message(chat_id, user_id, username, text):
             user_states[user_id]["state"] = STATE_CONTACT_MESSAGE
             send_msg(chat_id, t["contact_prompt"], keyboard=cancel_keyboard(lang))
             return
+        if text == t["payment"]:
+            send_msg(chat_id, t["payment_text"], keyboard=menu_keyboard(lang))
+            return
+        if text == t["plagiarism"]:
+            send_msg(chat_id, t["plagiarism_text"], keyboard=menu_keyboard(lang))
+            return
+        set_main_menu(chat_id, user_id)
+        return
 
+    if state["state"] == STATE_AI_CHAT:
         prompt = load_prompt("RUM", lang)
         _, reply = ask_openai(text, prompt, lang)
-        send_msg(chat_id, reply, keyboard=menu_keyboard(lang))
+        send_msg(chat_id, reply, keyboard=ai_keyboard(lang))
         return
 
     if state["state"] == STATE_CONTACT_MESSAGE:
@@ -512,10 +641,14 @@ def webhook():
         return "ok", 200
 
     chat = message.get("chat", {})
-    if chat.get("type") != "private":
+    chat_type = chat.get("type")
+    chat_id = chat.get("id")
+
+    if chat_type != "private":
+        if chat_id == admin_group_chat_id() and message.get("reply_to_message"):
+            handle_admin_reply(message)
         return "ok", 200
 
-    chat_id = chat.get("id")
     user = message.get("from", {})
     user_id = user.get("id")
     username = user.get("username")
