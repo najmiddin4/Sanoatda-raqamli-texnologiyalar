@@ -387,57 +387,175 @@
         <div class="hero-top">
           <img class="crest" src="https://rum-journal.com/public/logo.png" alt="RUM Journal logo" />
           <div>
-            <p class="eyebrow">RUM Journal Assistant</p>
+            <p class="eyebrow" id="eyebrowText"></p>
             <h1 class="title">Renaissance of Universal Mind</h1>
-            <p class="subtitle">Maqola yuborish, peer review, jurnal qoidalari va aloqa bo‘yicha tezkor, rasmiy yo‘naltiruvchi yordam.</p>
+            <p class="subtitle" id="subtitleText"></p>
           </div>
         </div>
         <div class="hero-badges">
-          <span class="badge">Open Access</span>
-          <span class="badge">Double-blind Review</span>
-          <span class="badge">Editorial Guidance</span>
+          <span class="badge" id="badgeOne"></span>
+          <span class="badge" id="badgeTwo"></span>
+          <span class="badge" id="badgeThree"></span>
         </div>
       </section>
 
       <section class="body">
         <div class="chat-panel">
           <div class="composer">
-            <textarea id="userMessage" class="textarea" placeholder="Savolingizni shu yerga yozing..." aria-label="Savol maydoni"></textarea>
-            <button class="send-btn" id="sendBtn" type="button">Yuborish</button>
+            <textarea id="userMessage" class="textarea" aria-label="Message field"></textarea>
+            <button class="send-btn" id="sendBtn" type="button"></button>
           </div>
-          <div class="hint">Enter — yuborish, Shift + Enter — yangi qator</div>
-          <div id="chat-history" class="history" aria-live="polite" aria-label="Suhbat tarixi"></div>
+          <div class="hint" id="hintText"></div>
+          <div id="chat-history" class="history" aria-live="polite"></div>
         </div>
 
         <aside class="side-panel">
           <div>
-            <h2 class="side-title">Rasmiy manbalar</h2>
-            <p class="side-copy">AI yordamchi faqat jurnalning rasmiy sahifalariga tayangan holda yo‘naltiruvchi javob beradi.</p>
+            <h2 class="side-title" id="sourcesTitle"></h2>
+            <p class="side-copy" id="sourcesCopy"></p>
           </div>
 
           <div class="info-stack">
             <div class="info-card">
-              <p class="info-label">Sayt</p>
+              <p class="info-label" id="siteLabel"></p>
               <a class="info-link" href="https://rum-journal.com" target="_top" rel="noopener">rum-journal.com</a>
             </div>
             <div class="info-card">
-              <p class="info-label">Telegram</p>
+              <p class="info-label" id="telegramLabel"></p>
               <a class="info-link" href="https://t.me/rum_journal" target="_blank" rel="noopener">@rum_journal</a>
             </div>
             <div class="info-card">
-              <p class="info-label">Aloqa</p>
+              <p class="info-label" id="contactLabel"></p>
               <div class="info-value">info@rum-journal.com</div>
               <div class="info-value">+998 90 673 64 33</div>
             </div>
           </div>
 
-          <a class="return-link" href="https://rum-journal.com" target="_top" rel="noopener">← RUM Journal saytiga qaytish</a>
+          <a class="return-link" id="returnLink" href="https://rum-journal.com" target="_top" rel="noopener"></a>
         </aside>
       </section>
     </div>
   </div>
 
   <script>
+    const I18N = {
+      uz: {
+        pageTitle: "Renaissance of Universal Mind — AI Yordamchi",
+        eyebrow: "RUM Journal Assistant",
+        subtitle: "Maqola yuborish, peer review, jurnal qoidalari va aloqa bo'yicha tezkor, rasmiy yo'naltiruvchi yordam.",
+        badgeOne: "Open Access",
+        badgeTwo: "Double-blind Review",
+        badgeThree: "Editorial Guidance",
+        placeholder: "Savolingizni shu yerga yozing...",
+        send: "Yuborish",
+        hint: "Enter — yuborish, Shift + Enter — yangi qator",
+        sourcesTitle: "Rasmiy manbalar",
+        sourcesCopy: "AI yordamchi faqat jurnalning rasmiy sahifalariga tayangan holda yo'naltiruvchi javob beradi.",
+        siteLabel: "Sayt",
+        telegramLabel: "Telegram",
+        contactLabel: "Aloqa",
+        returnText: "← RUM Journal saytiga qaytish",
+        historyLabel: "Suhbat tarixi",
+        inputAria: "Savol maydoni",
+        you: "Siz",
+        ai: "AI",
+        error: "Xatolik",
+        waiting: "Javob tayyorlanmoqda...",
+        serverError: "Server javobi olinmadi. Qayta urinib ko'ring.",
+        emptyReply: "Javob olinmadi. Qayta urinib ko'ring.",
+        connectionError: "Ulanishda muammo yuz berdi. Keyinroq urinib ko'ring."
+      },
+      ru: {
+        pageTitle: "Renaissance of Universal Mind — AI Ассистент",
+        eyebrow: "RUM Journal Assistant",
+        subtitle: "Быстрая официальная помощь по подаче статьи, peer review, правилам журнала и контактам редакции.",
+        badgeOne: "Open Access",
+        badgeTwo: "Double-blind Review",
+        badgeThree: "Editorial Guidance",
+        placeholder: "Напишите ваш вопрос здесь...",
+        send: "Отправить",
+        hint: "Enter — отправить, Shift + Enter — новая строка",
+        sourcesTitle: "Официальные источники",
+        sourcesCopy: "AI ассистент даёт ориентирующие ответы только на основе официальных страниц журнала.",
+        siteLabel: "Сайт",
+        telegramLabel: "Telegram",
+        contactLabel: "Контакты",
+        returnText: "← Вернуться на сайт RUM Journal",
+        historyLabel: "История чата",
+        inputAria: "Поле вопроса",
+        you: "Вы",
+        ai: "AI",
+        error: "Ошибка",
+        waiting: "Готовлю ответ...",
+        serverError: "Не удалось получить ответ от сервера. Попробуйте ещё раз.",
+        emptyReply: "Ответ не получен. Попробуйте ещё раз.",
+        connectionError: "Проблема с подключением. Попробуйте позже."
+      },
+      en: {
+        pageTitle: "Renaissance of Universal Mind — AI Assistant",
+        eyebrow: "RUM Journal Assistant",
+        subtitle: "Fast official guidance on article submission, peer review, journal rules, and editorial contacts.",
+        badgeOne: "Open Access",
+        badgeTwo: "Double-blind Review",
+        badgeThree: "Editorial Guidance",
+        placeholder: "Type your question here...",
+        send: "Send",
+        hint: "Enter — send, Shift + Enter — new line",
+        sourcesTitle: "Official Sources",
+        sourcesCopy: "The AI assistant provides guidance only based on the journal's official pages.",
+        siteLabel: "Website",
+        telegramLabel: "Telegram",
+        contactLabel: "Contact",
+        returnText: "← Return to the RUM Journal website",
+        historyLabel: "Chat history",
+        inputAria: "Question field",
+        you: "You",
+        ai: "AI",
+        error: "Error",
+        waiting: "Preparing a reply...",
+        serverError: "The server response could not be retrieved. Please try again.",
+        emptyReply: "No reply was received. Please try again.",
+        connectionError: "Connection problem. Please try again later."
+      }
+    };
+
+    function detectLang() {
+      const htmlLang = (document.documentElement.lang || "").toLowerCase();
+      if (htmlLang.startsWith("ru")) return "ru";
+      if (htmlLang.startsWith("en")) return "en";
+
+      const params = new URLSearchParams(window.location.search);
+      const queryLang = (params.get("lang") || "").toLowerCase();
+      if (queryLang === "ru" || queryLang === "en" || queryLang === "uz") return queryLang;
+
+      const path = window.location.pathname.toLowerCase();
+      if (path.includes("/ru/")) return "ru";
+      if (path.includes("/en/")) return "en";
+      return "uz";
+    }
+
+    const lang = detectLang();
+    const t = I18N[lang] || I18N.uz;
+
+    document.documentElement.lang = lang;
+    document.title = t.pageTitle;
+    document.getElementById("eyebrowText").textContent = t.eyebrow;
+    document.getElementById("subtitleText").textContent = t.subtitle;
+    document.getElementById("badgeOne").textContent = t.badgeOne;
+    document.getElementById("badgeTwo").textContent = t.badgeTwo;
+    document.getElementById("badgeThree").textContent = t.badgeThree;
+    document.getElementById("userMessage").placeholder = t.placeholder;
+    document.getElementById("userMessage").setAttribute("aria-label", t.inputAria);
+    document.getElementById("sendBtn").textContent = t.send;
+    document.getElementById("hintText").textContent = t.hint;
+    document.getElementById("sourcesTitle").textContent = t.sourcesTitle;
+    document.getElementById("sourcesCopy").textContent = t.sourcesCopy;
+    document.getElementById("siteLabel").textContent = t.siteLabel;
+    document.getElementById("telegramLabel").textContent = t.telegramLabel;
+    document.getElementById("contactLabel").textContent = t.contactLabel;
+    document.getElementById("returnLink").textContent = t.returnText;
+    document.getElementById("chat-history").setAttribute("aria-label", t.historyLabel);
+
     const messageBox = document.getElementById("userMessage");
     const historyBox = document.getElementById("chat-history");
     const sendBtn = document.getElementById("sendBtn");
@@ -462,11 +580,11 @@
       if (!message) return;
 
       sendBtn.disabled = true;
-      appendMsg("Siz", message, "user");
+      appendMsg(t.you, message, "user");
       messageBox.value = "";
       messageBox.focus();
 
-      const wait = appendMsg("AI", "Javob tayyorlanmoqda...", "waiting");
+      const wait = appendMsg(t.ai, t.waiting, "waiting");
 
       try {
         const res = await fetch("https://rum-journal.com/ai/ai.php", {
@@ -475,7 +593,7 @@
           body: JSON.stringify({
             message: message,
             journal: "RUM",
-            lang: "uz"
+            lang: lang
           })
         });
 
@@ -483,15 +601,15 @@
         wait.remove();
 
         if (!res.ok) {
-          appendMsg("Xatolik", "Server javobi olinmadi. Qayta urinib ko‘ring.", "error");
+          appendMsg(t.error, t.serverError, "error");
           return;
         }
 
-        const reply = data.reply || "Javob olinmadi. Qayta urinib ko‘ring.";
-        appendMsg("AI", reply, "ai");
+        const reply = data.reply || t.emptyReply;
+        appendMsg(t.ai, reply, "ai");
       } catch (err) {
         wait.remove();
-        appendMsg("Xatolik", "Ulanishda muammo yuz berdi. Keyinroq urinib ko‘ring.", "error");
+        appendMsg(t.error, t.connectionError, "error");
         console.error(err);
       } finally {
         sendBtn.disabled = false;
