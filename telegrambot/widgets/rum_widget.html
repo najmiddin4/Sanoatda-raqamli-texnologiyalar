@@ -438,6 +438,8 @@
   </div>
 
   <script>
+    const AI_API_URL = "https://sanoatda-raqamli-texnologiyalar-production.up.railway.app/api/ai";
+
     const I18N = {
       uz: {
         pageTitle: "Renaissance of Universal Mind — AI Yordamchi",
@@ -587,7 +589,7 @@
       const wait = appendMsg(t.ai, t.waiting, "waiting");
 
       try {
-        const res = await fetch("https://rum-journal.com/ai/ai.php", {
+        const res = await fetch(AI_API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -601,7 +603,7 @@
         wait.remove();
 
         if (!res.ok) {
-          appendMsg(t.error, t.serverError, "error");
+          appendMsg(t.error, data.reply || t.serverError, "error");
           return;
         }
 
