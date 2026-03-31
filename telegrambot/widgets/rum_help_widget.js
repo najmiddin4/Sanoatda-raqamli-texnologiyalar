@@ -2,9 +2,9 @@
   if (document.getElementById("rumHelpWrap")) return;
 
   const BRAND_1 = "#102542";
-  const BRAND_2 = "#1f5b92";
-  const NUDGE_DELAY_MS = 10000;
-  const NUDGE_KEY = "rum_ai_widget_nudge_v1";
+  const BRAND_2 = "#245f97";
+  const NUDGE_DELAY_MS = 9000;
+  const NUDGE_KEY = "rum_ai_widget_nudge_v2";
 
   function detectLang() {
     const raw = (document.documentElement.lang || "uz").toLowerCase();
@@ -37,55 +37,53 @@
 
   const WEB_AI_URL = CONFIG.webAi[LANG] || CONFIG.webAi.uz;
   const TG_AI_BOT = CONFIG.tgBot;
-  const TG_AI_LABEL = CONFIG.tgBotLabel;
   const TG_ADMIN_URL = CONFIG.adminUrl;
   const PHONE_HREF = "tel:" + CONFIG.phoneRaw;
-  const PHONE_LABEL = CONFIG.phoneLabel;
   const LOGO_URL = CONFIG.logo;
   const HEADER_TITLE = CONFIG.title[LANG] || CONFIG.title.uz;
 
   const I18N = {
     uz: {
       help: "Yordam",
-      webAiTitle: "AI yordamchi (saytda)",
-      webAiSub: "Savollarga tezkor javob",
-      tgAiTitle: "Telegram botga yozish",
-      tgAiSub: TG_AI_LABEL,
-      adminTitle: "Rasmiy Telegram sahifa",
+      webAiTitle: "AI yordamchi",
+      webAiSub: "Saytda tezkor javoblar",
+      tgAiTitle: "Telegram bot",
+      tgAiSub: CONFIG.tgBotLabel,
+      adminTitle: "Rasmiy kanal",
       adminSub: CONFIG.adminLabel,
-      phoneTitle: "Telefon orqali bog'lanish",
-      phoneSub: PHONE_LABEL,
-      headerTitle: HEADER_TITLE,
+      phoneTitle: "Telefon",
+      phoneSub: CONFIG.phoneLabel,
       closeLabel: "Yopish",
-      nudge: "Sizga qanday yordam bera olamiz?"
+      nudge: "Savolingiz bormi? RUM yordamchisidan foydalaning.",
+      chip: "RUM"
     },
     ru: {
       help: "Помощь",
-      webAiTitle: "AI помощник (на сайте)",
-      webAiSub: "Быстрые ответы на вопросы",
-      tgAiTitle: "Написать в Telegram бот",
-      tgAiSub: TG_AI_LABEL,
-      adminTitle: "Официальный Telegram",
+      webAiTitle: "AI помощник",
+      webAiSub: "Быстрые ответы на сайте",
+      tgAiTitle: "Telegram бот",
+      tgAiSub: CONFIG.tgBotLabel,
+      adminTitle: "Официальный канал",
       adminSub: CONFIG.adminLabel,
-      phoneTitle: "Позвонить",
-      phoneSub: PHONE_LABEL,
-      headerTitle: HEADER_TITLE,
+      phoneTitle: "Телефон",
+      phoneSub: CONFIG.phoneLabel,
       closeLabel: "Закрыть",
-      nudge: "Чем мы можем помочь?"
+      nudge: "Есть вопрос? Откройте помощник RUM.",
+      chip: "RUM"
     },
     en: {
       help: "Help",
-      webAiTitle: "AI assistant (on site)",
-      webAiSub: "Quick answers to questions",
-      tgAiTitle: "Message Telegram bot",
-      tgAiSub: TG_AI_LABEL,
-      adminTitle: "Official Telegram",
+      webAiTitle: "AI assistant",
+      webAiSub: "Quick on-site answers",
+      tgAiTitle: "Telegram bot",
+      tgAiSub: CONFIG.tgBotLabel,
+      adminTitle: "Official channel",
       adminSub: CONFIG.adminLabel,
-      phoneTitle: "Call",
-      phoneSub: PHONE_LABEL,
-      headerTitle: HEADER_TITLE,
+      phoneTitle: "Phone",
+      phoneSub: CONFIG.phoneLabel,
       closeLabel: "Close",
-      nudge: "How can we help you?"
+      nudge: "Need guidance? Open the RUM assistant.",
+      chip: "RUM"
     }
   };
 
@@ -101,172 +99,257 @@
 
   const wrap = document.createElement("div");
   wrap.id = "rumHelpWrap";
-  wrap.style.cssText = "position:fixed;right:18px;bottom:18px;z-index:99999;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;";
+  wrap.style.cssText = "position:fixed;right:18px;bottom:18px;z-index:99999;font-family:Inter,Segoe UI,Arial,sans-serif;";
 
   wrap.innerHTML = `
     <style>
       #rumHelpWrap * { box-sizing: border-box; }
+
       .rum-nudge {
         display: none;
         position: absolute;
-        right: 0; bottom: 86px;
-        max-width: 260px;
-        background: #fff;
-        border: 1px solid rgba(0,0,0,.12);
-        border-radius: 14px;
-        box-shadow: 0 14px 40px rgba(0,0,0,.18);
-        padding: 10px 12px;
-        cursor: pointer;
-        animation: rumPop .45s ease-out;
+        right: 4px;
+        bottom: 92px;
+        width: 250px;
+        padding: 14px 14px 12px;
+        border-radius: 20px;
+        color: #0e1a2b;
+        background: rgba(255,255,255,.92);
+        border: 1px solid rgba(14,26,43,.08);
+        box-shadow: 0 24px 60px rgba(15,39,71,.16);
+        backdrop-filter: blur(18px);
+        animation: rumFloatIn .3s ease;
       }
+
       .rum-nudge::after {
         content: "";
         position: absolute;
-        right: 22px; bottom: -10px;
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-top: 10px solid #fff;
-        filter: drop-shadow(0 2px 0 rgba(0,0,0,.08));
+        right: 26px;
+        bottom: -10px;
+        width: 18px;
+        height: 18px;
+        background: rgba(255,255,255,.92);
+        border-right: 1px solid rgba(14,26,43,.08);
+        border-bottom: 1px solid rgba(14,26,43,.08);
+        transform: rotate(45deg);
       }
+
       .rum-nudge-top {
         display: flex;
         align-items: flex-start;
-        justify-content: space-between;
         gap: 10px;
       }
-      .rum-nudge-text { font-size: 13px; font-weight: 800; color: #0f172a; line-height: 1.2; }
+
+      .rum-nudge-copy {
+        flex: 1 1 auto;
+      }
+
+      .rum-nudge-chip {
+        display: inline-flex;
+        margin-bottom: 6px;
+        padding: 5px 8px;
+        border-radius: 999px;
+        background: rgba(36,95,151,.10);
+        color: #245f97;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+      }
+
+      .rum-nudge-text {
+        font-size: 13px;
+        line-height: 1.45;
+        font-weight: 700;
+      }
+
       .rum-nudge-close {
+        width: 30px;
+        height: 30px;
         border: 0;
-        background: rgba(0,0,0,.06);
-        width: 28px; height: 28px;
         border-radius: 10px;
+        background: rgba(16,37,71,.08);
+        color: #102542;
         cursor: pointer;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-      }
-      .rum-nudge-close:hover { background: rgba(0,0,0,.10); }
-      @keyframes rumPop {
-        from { transform: translateY(8px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-      }
-      .rum-menu { display: none; margin-bottom: 10px; }
-      .rum-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        width: 320px;
-        padding: 12px;
-        border-radius: 14px;
-        border: 1px solid rgba(0,0,0,.10);
-        background: #fff;
-        color: #111;
-        text-decoration: none;
-        cursor: pointer;
-        box-shadow: 0 8px 20px rgba(0,0,0,.10);
-        margin-bottom: 10px;
-        text-align: left;
-        transition: background .15s;
-      }
-      .rum-item:hover { background: #f0f6ff; }
-      .rum-ico {
-        width: 34px; height: 34px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(16,37,66,.10);
-        color: ${BRAND_1};
         flex: 0 0 auto;
       }
-      .rum-title { font-weight: 900; line-height: 1.1; font-size: 14px; }
-      .rum-sub { font-size: 12px; opacity: .70; margin-top: 2px; }
-      .rum-card {
-        width: 360px; height: 520px;
-        background: #fff;
-        border: 1px solid rgba(0,0,0,.08);
-        border-radius: 16px;
-        box-shadow: 0 14px 40px rgba(0,0,0,.18);
-        overflow: hidden;
+
+      .rum-menu {
+        display: none;
+        margin-bottom: 12px;
+        width: 320px;
+        padding: 10px;
+        border-radius: 24px;
+        background: rgba(255,255,255,.84);
+        border: 1px solid rgba(255,255,255,.55);
+        box-shadow: 0 22px 60px rgba(15,39,71,.16);
+        backdrop-filter: blur(20px);
       }
-      .rum-box { display: none; margin-bottom: 10px; }
+
+      .rum-item {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 10px;
+        padding: 13px;
+        border: 1px solid rgba(14,26,43,.08);
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(247,250,253,.94));
+        color: #0e1a2b;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform .18s ease, background .18s ease;
+      }
+
+      .rum-item:last-child { margin-bottom: 0; }
+      .rum-item:hover { transform: translateY(-1px); background: #f7fbff; }
+
+      .rum-ico {
+        width: 38px;
+        height: 38px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(36,95,151,.10);
+        color: #245f97;
+        flex: 0 0 auto;
+      }
+
+      .rum-title { font-size: 14px; font-weight: 800; line-height: 1.1; }
+      .rum-sub { margin-top: 4px; font-size: 12px; color: #66768b; }
+
+      .rum-box {
+        display: none;
+        margin-bottom: 12px;
+        width: 360px;
+        height: 540px;
+        border-radius: 24px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,.55);
+        background: rgba(255,255,255,.86);
+        box-shadow: 0 26px 70px rgba(15,39,71,.2);
+        backdrop-filter: blur(20px);
+      }
+
       .rum-head {
-        background: linear-gradient(135deg, ${BRAND_1}, ${BRAND_2});
+        padding: 12px 14px;
         color: #fff;
-        padding: 10px 12px;
+        background: linear-gradient(135deg, ${BRAND_1}, ${BRAND_2});
         display: flex;
         align-items: center;
         justify-content: space-between;
       }
+
       .rum-head-left {
         display: flex;
         align-items: center;
         gap: 10px;
-        font-weight: 900;
-        font-size: 14px;
+        min-width: 0;
       }
+
       .rum-logo {
-        width: 28px; height: 28px;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
-        background: #fff;
-        padding: 2px;
+        background: rgba(255,255,255,.95);
+        padding: 3px;
         object-fit: contain;
+        flex: 0 0 auto;
       }
+
+      .rum-head-title {
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
       .rum-close {
+        width: 34px;
+        height: 34px;
         border: 0;
-        background: rgba(255,255,255,.18);
-        color: #fff;
-        width: 34px; height: 34px;
         border-radius: 12px;
-        display: flex;
+        color: #fff;
+        background: rgba(255,255,255,.15);
+        cursor: pointer;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
       }
+
       .rum-main {
-        border: 0;
-        border-radius: 999px;
-        padding: 12px 20px;
-        font-weight: 900;
-        font-size: 15px;
-        cursor: pointer;
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
+        padding: 12px 14px 12px 12px;
+        border: 1px solid rgba(255,255,255,.35);
+        border-radius: 999px;
         color: #fff;
-        background: linear-gradient(135deg, ${BRAND_1}, ${BRAND_2});
-        box-shadow: 0 12px 34px rgba(0,0,0,.25);
-        position: relative;
+        background: linear-gradient(135deg, rgba(16,37,71,.98), rgba(36,95,151,.95));
+        box-shadow: 0 20px 42px rgba(15,39,71,.28);
+        cursor: pointer;
       }
+
       .rum-main img {
-        width: 36px; height: 36px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
-        background: #fff;
-        padding: 3px;
-        flex: 0 0 auto;
+        background: rgba(255,255,255,.95);
+        padding: 4px;
         object-fit: contain;
       }
-      .rum-main.rum-attention { animation: rumPulse 1.4s ease-in-out infinite; }
-      .rum-main.rum-attention img { animation: rumWiggle 2.8s ease-in-out infinite; }
+
+      .rum-main-copy {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1px;
+      }
+
+      .rum-main-chip {
+        font-size: 10px;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        opacity: .68;
+        font-weight: 800;
+      }
+
+      .rum-main-label {
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .rum-main.rum-attention { animation: rumPulse 1.7s ease-in-out infinite; }
+
       @keyframes rumPulse {
-        0%,100% { transform: scale(1); box-shadow: 0 12px 34px rgba(0,0,0,.25); }
-        50% { transform: scale(1.04); box-shadow: 0 16px 44px rgba(0,0,0,.32); }
+        0%,100% { transform: scale(1); }
+        50% { transform: scale(1.03); }
       }
-      @keyframes rumWiggle {
-        0%,100% { transform: rotate(0deg); }
-        95% { transform: rotate(-6deg); }
-        98% { transform: rotate(6deg); }
+
+      @keyframes rumFloatIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
       }
+
       @media (max-width: 420px) {
-        .rum-item { width: 290px; }
-        .rum-card { width: 320px; height: 500px; }
-        .rum-nudge { bottom: 82px; max-width: 230px; }
+        .rum-menu { width: 292px; }
+        .rum-box { width: 320px; height: 510px; }
+        .rum-nudge { width: 220px; }
       }
     </style>
 
     <div class="rum-nudge" id="rumNudge" role="dialog" aria-live="polite">
       <div class="rum-nudge-top">
-        <div class="rum-nudge-text">${T.nudge}</div>
+        <div class="rum-nudge-copy">
+          <span class="rum-nudge-chip">${T.chip}</span>
+          <div class="rum-nudge-text">${T.nudge}</div>
+        </div>
         <button class="rum-nudge-close" id="rumNudgeClose" aria-label="${T.closeLabel}">${ICON.close}</button>
       </div>
     </div>
@@ -274,51 +357,39 @@
     <div class="rum-menu" id="rumMenu">
       <button type="button" class="rum-item" id="rumOpenWebAI">
         <span class="rum-ico">${ICON.robot}</span>
-        <span>
-          <div class="rum-title">${T.webAiTitle}</div>
-          <div class="rum-sub">${T.webAiSub}</div>
-        </span>
+        <span><div class="rum-title">${T.webAiTitle}</div><div class="rum-sub">${T.webAiSub}</div></span>
       </button>
 
       <a class="rum-item" href="${TG_AI_BOT}" target="_blank" rel="noopener noreferrer">
         <span class="rum-ico">${ICON.telegram}</span>
-        <span>
-          <div class="rum-title">${T.tgAiTitle}</div>
-          <div class="rum-sub">${T.tgAiSub}</div>
-        </span>
+        <span><div class="rum-title">${T.tgAiTitle}</div><div class="rum-sub">${T.tgAiSub}</div></span>
       </a>
 
       <a class="rum-item" href="${TG_ADMIN_URL}" target="_blank" rel="noopener noreferrer">
         <span class="rum-ico">${ICON.user}</span>
-        <span>
-          <div class="rum-title">${T.adminTitle}</div>
-          <div class="rum-sub">${T.adminSub}</div>
-        </span>
+        <span><div class="rum-title">${T.adminTitle}</div><div class="rum-sub">${T.adminSub}</div></span>
       </a>
 
       <a class="rum-item" href="${PHONE_HREF}">
         <span class="rum-ico">${ICON.phone}</span>
-        <span>
-          <div class="rum-title">${T.phoneTitle}</div>
-          <div class="rum-sub">${T.phoneSub}</div>
-        </span>
+        <span><div class="rum-title">${T.phoneTitle}</div><div class="rum-sub">${T.phoneSub}</div></span>
       </a>
     </div>
 
-    <div class="rum-card rum-box" id="rumBox">
+    <div class="rum-box" id="rumBox">
       <div class="rum-head">
         <div class="rum-head-left">
           <img class="rum-logo" src="${LOGO_URL}" alt="RUM logo" />
-          <span>${T.headerTitle}</span>
+          <span class="rum-head-title">${HEADER_TITLE}</span>
         </div>
         <button type="button" class="rum-close" id="rumClose" aria-label="${T.closeLabel}">${ICON.close}</button>
       </div>
-      <iframe src="${WEB_AI_URL}" style="width:100%;height:calc(100% - 52px);border:0;background:#fff;" loading="lazy" title="${T.headerTitle}"></iframe>
+      <iframe src="${WEB_AI_URL}" style="width:100%;height:calc(100% - 54px);border:0;background:#fff;" loading="lazy" title="${HEADER_TITLE}"></iframe>
     </div>
 
     <button type="button" class="rum-main rum-attention" id="rumMainBtn">
       <img src="${LOGO_URL}" alt="RUM logo" />
-      ${T.help}
+      <span class="rum-main-copy"><span class="rum-main-chip">${T.chip}</span><span class="rum-main-label">${T.help}</span></span>
     </button>
   `;
 

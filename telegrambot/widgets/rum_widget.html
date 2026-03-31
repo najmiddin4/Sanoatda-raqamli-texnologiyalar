@@ -3,218 +3,437 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Renaissance of Universal Mind — AI Yordamchi</title>
+  <title>Renaissance of Universal Mind — AI Assistant</title>
   <style>
     :root {
-      --bg: #f5f6f8;
-      --card: #ffffff;
-      --border: rgba(15, 23, 42, 0.12);
-      --text: #0f172a;
-      --muted: rgba(15, 23, 42, 0.68);
-      --brand1: #102542;
-      --brand2: #1f5b92;
-      --btn: #102542;
-      --btnHover: #0b1a2f;
-      --shadow: 0 18px 44px rgba(16, 37, 66, 0.14);
-      --radius: 18px;
+      --ink: #0e1a2b;
+      --muted: #586579;
+      --line: rgba(14, 26, 43, 0.12);
+      --paper: rgba(255, 255, 255, 0.88);
+      --panel: #ffffff;
+      --brand-1: #0f2747;
+      --brand-2: #245f97;
+      --brand-3: #d7e8f8;
+      --accent: #c08a2f;
+      --shadow: 0 24px 70px rgba(15, 39, 71, 0.18);
+      --radius-xl: 28px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
     }
 
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body {
       margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-      background: linear-gradient(180deg, #eef3f8 0%, #f7f8fb 100%);
-      color: var(--text);
+      color: var(--ink);
+      font-family: "Georgia", "Times New Roman", serif;
+      background:
+        radial-gradient(circle at top left, rgba(36, 95, 151, 0.16), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(192, 138, 47, 0.14), transparent 28%),
+        linear-gradient(180deg, #eef4f8 0%, #f7f8fb 46%, #edf2f7 100%);
     }
 
-    .page {
+    .shell {
       min-height: 100%;
-      display: flex;
-      padding: 16px;
-    }
-
-    .card {
-      width: 100%;
-      max-width: 760px;
-      margin: auto;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .header {
+      padding: 18px;
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 18px;
-      background: linear-gradient(135deg, var(--brand1), var(--brand2));
-      color: #fff;
+      justify-content: center;
     }
 
-    .logo {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #fff;
-      padding: 4px;
+    .frame {
+      width: min(100%, 860px);
+      background: var(--paper);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .frame::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.28), transparent 38%),
+        linear-gradient(180deg, transparent, rgba(15,39,71,0.03));
+      pointer-events: none;
+    }
+
+    .hero {
+      position: relative;
+      padding: 28px 28px 20px;
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(15, 39, 71, 0.98), rgba(36, 95, 151, 0.96)),
+        url("https://rum-journal.com/public/journals/1/Banner01.jpg") center/cover;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -55% auto;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(255,255,255,0.22), transparent 62%);
+      pointer-events: none;
+    }
+
+    .hero-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .crest {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.96);
+      padding: 6px;
+      box-shadow: inset 0 0 0 1px rgba(15, 39, 71, 0.08);
+      object-fit: contain;
       flex: 0 0 auto;
-      object-fit: cover;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      font: 700 11px/1.2 Arial, sans-serif;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.72);
     }
 
     .title {
       margin: 0;
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
+      font-size: clamp(22px, 3vw, 30px);
+      line-height: 1.05;
+      letter-spacing: 0.01em;
     }
 
     .subtitle {
-      margin: 6px 0 0;
-      font-size: 12px;
-      opacity: 0.92;
-      font-family: Arial, sans-serif;
+      margin: 10px 0 0;
+      max-width: 640px;
+      font: 400 14px/1.55 Arial, sans-serif;
+      color: rgba(255,255,255,0.86);
     }
 
-    .content {
-      padding: 16px;
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      font: 700 12px/1 Arial, sans-serif;
+      letter-spacing: 0.04em;
+    }
+
+    .body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 250px;
+      gap: 18px;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .chat-panel,
+    .side-panel {
+      background: rgba(255,255,255,0.86);
+      border: 1px solid rgba(14, 26, 43, 0.08);
+      border-radius: 22px;
+      box-shadow: 0 10px 30px rgba(15, 39, 71, 0.06);
+    }
+
+    .chat-panel {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .composer {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 128px;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .textarea {
+      width: 100%;
+      min-height: 110px;
+      max-height: 190px;
+      resize: vertical;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #f9fbfd);
+      padding: 16px 18px;
+      color: var(--ink);
+      font: 400 14px/1.6 Arial, sans-serif;
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+
+    .textarea:focus {
+      border-color: rgba(36, 95, 151, 0.45);
+      box-shadow: 0 0 0 5px rgba(36, 95, 151, 0.10);
+      transform: translateY(-1px);
+    }
+
+    .send-btn {
+      min-height: 54px;
+      border: 0;
+      border-radius: 18px;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+      box-shadow: 0 14px 30px rgba(15, 39, 71, 0.22);
+      font: 700 15px/1 Arial, sans-serif;
+      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+    }
+
+    .send-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 34px rgba(15, 39, 71, 0.28);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .hint {
+      margin: -2px 2px 0;
+      color: var(--muted);
+      font: 600 11px/1.4 Arial, sans-serif;
+      letter-spacing: 0.02em;
+    }
+
+    .history {
+      min-height: 290px;
+      max-height: 390px;
+      overflow: auto;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      scrollbar-width: thin;
+    }
+
+    .bubble {
+      max-width: 88%;
+      padding: 12px 14px;
+      border-radius: 18px;
+      font: 400 14px/1.55 Arial, sans-serif;
+      white-space: pre-wrap;
+      word-break: break-word;
+      animation: reveal .22s ease;
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #15345a, #235f96);
+      color: #fff;
+      border-bottom-right-radius: 6px;
+      box-shadow: 0 12px 24px rgba(15, 39, 71, 0.18);
+    }
+
+    .bubble.ai {
+      align-self: flex-start;
+      background: #f6f9fc;
+      color: var(--ink);
+      border: 1px solid rgba(14, 26, 43, 0.08);
+      border-bottom-left-radius: 6px;
+    }
+
+    .bubble.error {
+      align-self: flex-start;
+      background: #fff4f4;
+      border: 1px solid rgba(178, 53, 53, 0.14);
+      color: #8f1f1f;
+    }
+
+    .bubble.waiting {
+      align-self: flex-start;
+      color: var(--muted);
+      background: rgba(215, 232, 248, 0.46);
+      border: 1px dashed rgba(36, 95, 151, 0.18);
+      font-style: italic;
+    }
+
+    .side-panel {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .side-title {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.15;
+    }
+
+    .side-copy {
+      margin: 0;
+      color: var(--muted);
+      font: 400 13px/1.6 Arial, sans-serif;
+    }
+
+    .info-stack {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
-    .textarea {
-      width: 100%;
-      min-height: 96px;
-      max-height: 180px;
-      padding: 12px;
-      font-size: 14px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      outline: none;
-      resize: vertical;
-      background: #fff;
-      font-family: Arial, sans-serif;
+    .info-card {
+      padding: 12px 13px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffffff, #f8fbfd);
+      border: 1px solid rgba(14, 26, 43, 0.08);
     }
 
-    .textarea:focus {
-      border-color: rgba(31, 91, 146, 0.45);
-      box-shadow: 0 0 0 4px rgba(31, 91, 146, 0.12);
-    }
-
-    .btn {
-      width: 100%;
-      padding: 12px 14px;
-      background: var(--btn);
-      color: #fff;
-      border: 0;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 15px;
-      cursor: pointer;
-      transition: background 0.15s ease;
-      font-family: Arial, sans-serif;
-    }
-
-    .btn:hover { background: var(--btnHover); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .tip {
-      font-size: 12px;
+    .info-label {
+      margin: 0 0 6px;
       color: var(--muted);
-      margin-top: -2px;
-      font-family: Arial, sans-serif;
+      font: 700 10px/1.2 Arial, sans-serif;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
     }
 
-    .history {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: #fff;
-      padding: 10px;
-      font-size: 14px;
-      line-height: 1.5;
-      overflow: auto;
-      height: clamp(190px, 38vh, 340px);
-      font-family: Arial, sans-serif;
-    }
-
-    .msg {
-      margin: 8px 0;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .who { font-weight: 700; }
-
-    .ai-wait {
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    .footer {
-      padding: 14px 16px 16px;
-      border-top: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.02);
-    }
-
-    .note {
-      margin: 0;
-      font-size: 12.5px;
-      color: var(--muted);
-      line-height: 1.5;
-      font-family: Arial, sans-serif;
-    }
-
-    .home {
-      display: inline-block;
-      margin-top: 10px;
+    .info-value,
+    .info-link {
+      color: var(--ink);
       text-decoration: none;
-      font-weight: 700;
-      color: var(--btn);
-      font-family: Arial, sans-serif;
+      font: 700 13px/1.45 Arial, sans-serif;
     }
 
-    .home:hover { text-decoration: underline; }
+    .info-link:hover {
+      color: var(--brand-2);
+    }
 
-    @media (max-width: 420px) {
-      .page { padding: 10px; }
-      .header { padding: 14px; }
-      .logo { width: 42px; height: 42px; }
-      .title { font-size: 16px; }
-      .content { padding: 12px; }
-      .history { height: clamp(180px, 34vh, 280px); }
+    .return-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--brand-1);
+      font: 700 13px/1.2 Arial, sans-serif;
+    }
+
+    .return-link:hover {
+      color: var(--brand-2);
+    }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 880px) {
+      .body {
+        grid-template-columns: 1fr;
+      }
+
+      .side-panel {
+        order: 2;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .shell {
+        padding: 10px;
+      }
+
+      .hero,
+      .body {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .composer {
+        grid-template-columns: 1fr;
+      }
+
+      .send-btn {
+        width: 100%;
+      }
+
+      .bubble {
+        max-width: 96%;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div class="card">
-      <div class="header">
-        <img class="logo" src="https://rum-journal.com/public/logo.png" alt="RUM Journal logo" />
-        <div>
-          <p class="title">Renaissance of Universal Mind — AI Yordamchi</p>
-          <p class="subtitle">Maqola yuborish, jurnal talablari va tahririyat bilan bog'lanish bo'yicha tezkor yordam</p>
+  <div class="shell">
+    <div class="frame">
+      <section class="hero">
+        <div class="hero-top">
+          <img class="crest" src="https://rum-journal.com/public/logo.png" alt="RUM Journal logo" />
+          <div>
+            <p class="eyebrow">RUM Journal Assistant</p>
+            <h1 class="title">Renaissance of Universal Mind</h1>
+            <p class="subtitle">Maqola yuborish, peer review, jurnal qoidalari va aloqa bo‘yicha tezkor, rasmiy yo‘naltiruvchi yordam.</p>
+          </div>
         </div>
-      </div>
+        <div class="hero-badges">
+          <span class="badge">Open Access</span>
+          <span class="badge">Double-blind Review</span>
+          <span class="badge">Editorial Guidance</span>
+        </div>
+      </section>
 
-      <div class="content">
-        <textarea id="userMessage" class="textarea" placeholder="Savolingizni shu yerga yozing..." aria-label="Savol maydoni"></textarea>
-        <button class="btn" id="sendBtn" type="button">Yuborish</button>
-        <div class="tip">Enter — yuborish · Shift + Enter — yangi qator</div>
-        <div id="chat-history" class="history" aria-live="polite" aria-label="Suhbat tarixi"></div>
-      </div>
+      <section class="body">
+        <div class="chat-panel">
+          <div class="composer">
+            <textarea id="userMessage" class="textarea" placeholder="Savolingizni shu yerga yozing..." aria-label="Savol maydoni"></textarea>
+            <button class="send-btn" id="sendBtn" type="button">Yuborish</button>
+          </div>
+          <div class="hint">Enter — yuborish, Shift + Enter — yangi qator</div>
+          <div id="chat-history" class="history" aria-live="polite" aria-label="Suhbat tarixi"></div>
+        </div>
 
-      <div class="footer">
-        <p class="note">
-          <strong>Eslatma:</strong> AI yordamchi <strong>Renaissance of Universal Mind</strong> jurnali bo'yicha rasmiy yo'naltiruvchi javoblar beradi.
-          Qo'shimcha aniqlashtirish uchun <strong>@najmiddin_b</strong> yoki <strong>+998 90 673 64 33</strong> orqali bog'lanishingiz mumkin.
-        </p>
-        <a class="home" href="https://rum-journal.com" target="_top" rel="noopener">← RUM Journal saytiga qaytish</a>
-      </div>
+        <aside class="side-panel">
+          <div>
+            <h2 class="side-title">Rasmiy manbalar</h2>
+            <p class="side-copy">AI yordamchi faqat jurnalning rasmiy sahifalariga tayangan holda yo‘naltiruvchi javob beradi.</p>
+          </div>
+
+          <div class="info-stack">
+            <div class="info-card">
+              <p class="info-label">Sayt</p>
+              <a class="info-link" href="https://rum-journal.com" target="_top" rel="noopener">rum-journal.com</a>
+            </div>
+            <div class="info-card">
+              <p class="info-label">Telegram</p>
+              <a class="info-link" href="https://t.me/rum_journal" target="_blank" rel="noopener">@rum_journal</a>
+            </div>
+            <div class="info-card">
+              <p class="info-label">Aloqa</p>
+              <div class="info-value">info@rum-journal.com</div>
+              <div class="info-value">+998 90 673 64 33</div>
+            </div>
+          </div>
+
+          <a class="return-link" href="https://rum-journal.com" target="_top" rel="noopener">← RUM Journal saytiga qaytish</a>
+        </aside>
+      </section>
     </div>
   </div>
 
@@ -230,9 +449,9 @@
     }
 
     function appendMsg(who, text, cls) {
-      const p = document.createElement("p");
-      p.className = "msg" + (cls ? " " + cls : "");
-      p.innerHTML = "<span class=\"who\">" + escHtml(who) + ":</span> " + escHtml(text);
+      const p = document.createElement("div");
+      p.className = "bubble " + (cls || "ai");
+      p.innerHTML = "<strong>" + escHtml(who) + "</strong><br>" + escHtml(text);
       historyBox.appendChild(p);
       historyBox.scrollTop = historyBox.scrollHeight;
       return p;
@@ -243,15 +462,11 @@
       if (!message) return;
 
       sendBtn.disabled = true;
-      appendMsg("Siz", message);
+      appendMsg("Siz", message, "user");
       messageBox.value = "";
       messageBox.focus();
 
-      const wait = document.createElement("p");
-      wait.className = "msg ai-wait";
-      wait.textContent = "AI javob yozmoqda...";
-      historyBox.appendChild(wait);
-      historyBox.scrollTop = historyBox.scrollHeight;
+      const wait = appendMsg("AI", "Javob tayyorlanmoqda...", "waiting");
 
       try {
         const res = await fetch("https://rum-journal.com/ai/ai.php", {
@@ -268,15 +483,15 @@
         wait.remove();
 
         if (!res.ok) {
-          appendMsg("Xatolik", "Server javobi olinmadi. Qayta urinib ko'ring.");
+          appendMsg("Xatolik", "Server javobi olinmadi. Qayta urinib ko‘ring.", "error");
           return;
         }
 
-        const reply = data.reply || "Javob olinmadi. Qayta urinib ko'ring.";
-        appendMsg("AI", reply);
+        const reply = data.reply || "Javob olinmadi. Qayta urinib ko‘ring.";
+        appendMsg("AI", reply, "ai");
       } catch (err) {
         wait.remove();
-        appendMsg("Xatolik", "Ulanishda muammo yuz berdi. Keyinroq urinib ko'ring.");
+        appendMsg("Xatolik", "Ulanishda muammo yuz berdi. Keyinroq urinib ko‘ring.", "error");
         console.error(err);
       } finally {
         sendBtn.disabled = false;

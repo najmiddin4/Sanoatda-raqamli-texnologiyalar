@@ -9,225 +9,291 @@
   }
 
   const LANG = detectLang();
+  const SITE_URL = "https://rum-journal.com/index.php/RUM/submission";
+  const TELEGRAM_URL = "https://t.me/rum_editorial_bot";
 
   const I18N = {
     uz: {
       submit: "Maqola yuborish",
-      chooseTitle: "Maqola yuborish usulini tanlang",
-      chooseText: "Quyidagi usullardan birini tanlang:",
+      chooseTitle: "Yuborish usulini tanlang",
+      chooseText: "RUM Journal maqolasini quyidagi ikki usuldan biri orqali yuborishingiz mumkin.",
       siteTitle: "Sayt orqali yuborish",
-      siteText: "RUM Journal OJS tizimi orqali maqola yuborish",
+      siteText: "OJS platformada rasmiy submission jarayonini boshlash",
       tgTitle: "Telegram bot orqali yuborish",
       tgText: "@rum_editorial_bot orqali tezkor yuborish",
       close: "Yopish",
-      open: "Kirish"
+      open: "Ochish",
+      chip: "RUM Editorial"
     },
     ru: {
       submit: "Отправить статью",
-      chooseTitle: "Выберите способ отправки статьи",
-      chooseText: "Выберите один из следующих вариантов:",
-      siteTitle: "Отправить через сайт",
-      siteText: "Отправка статьи через систему OJS журнала RUM",
-      tgTitle: "Отправить через Telegram бот",
+      chooseTitle: "Выберите способ отправки",
+      chooseText: "Вы можете отправить статью в RUM Journal одним из двух способов ниже.",
+      siteTitle: "Через сайт",
+      siteText: "Запустить официальную submission-подачу в OJS",
+      tgTitle: "Через Telegram бот",
       tgText: "Быстрая отправка через @rum_editorial_bot",
       close: "Закрыть",
-      open: "Открыть"
+      open: "Открыть",
+      chip: "RUM Editorial"
     },
     en: {
-      submit: "Submit article",
-      chooseTitle: "Choose a submission method",
-      chooseText: "Select one of the following options:",
-      siteTitle: "Submit via website",
-      siteText: "Submit your manuscript through the RUM Journal OJS system",
+      submit: "Submit Article",
+      chooseTitle: "Choose a submission route",
+      chooseText: "You can submit your RUM Journal manuscript using one of the two options below.",
+      siteTitle: "Submit on the website",
+      siteText: "Start the official OJS submission flow",
       tgTitle: "Submit via Telegram bot",
-      tgText: "Quick submission via @rum_editorial_bot",
+      tgText: "Quick submission through @rum_editorial_bot",
       close: "Close",
-      open: "Open"
+      open: "Open",
+      chip: "RUM Editorial"
     }
   };
 
   const T = I18N[LANG] || I18N.uz;
-  const SITE_URL = "https://rum-journal.com/index.php/RUM/submission";
-  const TELEGRAM_URL = "https://t.me/rum_editorial_bot";
 
   const wrap = document.createElement("div");
   wrap.id = "rumSubmitFloat";
-  wrap.style.cssText = "position:fixed;right:18px;bottom:90px;z-index:99999;font-family:system-ui,Segoe UI,Arial,sans-serif;";
+  wrap.style.cssText = "position:fixed;right:20px;bottom:92px;z-index:99999;font-family:Inter,Segoe UI,Arial,sans-serif;";
 
   wrap.innerHTML = `
     <style>
-      #rumSubmitFloat a,
-      #rumSubmitFloat button {
-        font-family: inherit;
-      }
+      #rumSubmitFloat * { box-sizing: border-box; }
+      #rumSubmitFloat a, #rumSubmitFloat button { font-family: inherit; }
 
-      #rumSubmitFloat .submit-btn {
+      .rum-submit-trigger {
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 12px 18px;
+        padding: 12px 16px 12px 12px;
         border-radius: 999px;
-        background: linear-gradient(135deg, #102542, #1f5b92);
+        border: 1px solid rgba(255,255,255,.35);
+        background: linear-gradient(135deg, rgba(15,39,71,.96), rgba(36,95,151,.94));
         color: #fff;
-        font-weight: 800;
-        text-decoration: none;
-        border: 0;
         cursor: pointer;
-        box-shadow: 0 12px 32px rgba(0,0,0,.25);
-        animation: rumSubmitPulse 1.6s infinite;
+        box-shadow: 0 18px 38px rgba(15,39,71,.28);
+        backdrop-filter: blur(18px);
+        transition: transform .18s ease, box-shadow .18s ease;
       }
 
-      #rumSubmitFloat .submit-btn:hover {
-        transform: scale(1.05);
+      .rum-submit-trigger:hover {
+        transform: translateY(-1px) scale(1.02);
+        box-shadow: 0 22px 44px rgba(15,39,71,.32);
       }
 
-      @keyframes rumSubmitPulse {
-        50% { transform: scale(1.05); }
-      }
-
-      #rumSubmitModal {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,.45);
-        display: none;
+      .rum-submit-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        z-index: 100000;
-        padding: 20px;
+        background: rgba(255,255,255,.15);
+        font-size: 18px;
       }
 
-      #rumSubmitModal.show {
+      .rum-submit-label {
         display: flex;
+        flex-direction: column;
+        gap: 2px;
       }
 
-      .rum-submit-card {
-        width: 100%;
-        max-width: 560px;
-        background: #fff;
-        border-radius: 18px;
-        box-shadow: 0 20px 50px rgba(0,0,0,.22);
-        overflow: hidden;
-      }
-
-      .rum-submit-head {
-        background: linear-gradient(135deg, #102542, #1f5b92);
-        color: #fff;
-        padding: 18px 20px;
-        font-size: 20px;
-        font-weight: 800;
-      }
-
-      .rum-submit-body {
-        padding: 20px;
+      .rum-submit-chip {
+        font-size: 10px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        opacity: .7;
+        font-weight: 700;
       }
 
       .rum-submit-text {
-        margin: 0 0 16px;
-        color: #334155;
-        font-size: 15px;
-      }
-
-      .rum-submit-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      .rum-submit-item {
-        border: 1px solid #dbe3ea;
-        border-radius: 14px;
-        padding: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        background: #f8fafc;
-      }
-
-      .rum-submit-meta {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .rum-submit-name {
-        font-weight: 700;
-        color: #0f172a;
-        line-height: 1.35;
-      }
-
-      .rum-submit-desc {
-        color: #475569;
         font-size: 14px;
-        line-height: 1.4;
+        font-weight: 800;
       }
 
-      .rum-submit-link {
-        white-space: nowrap;
-        text-decoration: none;
-        background: #1f5b92;
+      .rum-submit-modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: rgba(7, 15, 29, 0.44);
+        backdrop-filter: blur(6px);
+        z-index: 100000;
+      }
+
+      .rum-submit-modal.show { display: flex; }
+
+      .rum-submit-card {
+        width: min(100%, 620px);
+        border-radius: 28px;
+        overflow: hidden;
+        background: rgba(255,255,255,.92);
+        border: 1px solid rgba(255,255,255,.6);
+        box-shadow: 0 28px 90px rgba(15,39,71,.22);
+      }
+
+      .rum-submit-head {
+        padding: 24px 24px 18px;
+        background:
+          radial-gradient(circle at top right, rgba(255,255,255,.22), transparent 30%),
+          linear-gradient(135deg, #102542, #245f97);
         color: #fff;
-        padding: 10px 14px;
-        border-radius: 10px;
-        font-weight: 700;
       }
 
-      .rum-submit-link:hover {
-        opacity: .92;
+      .rum-submit-title {
+        margin: 0;
+        font-size: 24px;
+        line-height: 1.05;
+        font-weight: 800;
       }
+
+      .rum-submit-copy {
+        margin: 10px 0 0;
+        max-width: 480px;
+        color: rgba(255,255,255,.82);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .rum-submit-body {
+        padding: 18px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .rum-option {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+        padding: 18px;
+        border-radius: 20px;
+        border: 1px solid rgba(14,26,43,.10);
+        background: linear-gradient(180deg, #ffffff, #f7fafd);
+      }
+
+      .rum-option-main {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+      }
+
+      .rum-option-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(36,95,151,.10);
+        color: #1f5b92;
+        font-size: 21px;
+        flex: 0 0 auto;
+      }
+
+      .rum-option-title {
+        margin: 0;
+        color: #0e1a2b;
+        font-size: 16px;
+        font-weight: 800;
+      }
+
+      .rum-option-desc {
+        margin: 6px 0 0;
+        color: #607086;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .rum-option-link {
+        text-decoration: none;
+        white-space: nowrap;
+        padding: 12px 16px;
+        border-radius: 14px;
+        color: #fff;
+        background: linear-gradient(135deg, #102542, #245f97);
+        font-size: 13px;
+        font-weight: 800;
+        box-shadow: 0 12px 24px rgba(15,39,71,.16);
+      }
+
+      .rum-option-link:hover { opacity: .95; }
 
       .rum-submit-foot {
-        padding: 0 20px 20px;
+        padding: 0 18px 18px;
         display: flex;
         justify-content: flex-end;
       }
 
       .rum-submit-close {
         border: 0;
-        background: #e5e7eb;
-        color: #111827;
-        padding: 10px 14px;
-        border-radius: 10px;
-        font-weight: 700;
+        border-radius: 14px;
+        padding: 11px 14px;
         cursor: pointer;
+        color: #102542;
+        background: rgba(16,37,71,.08);
+        font-size: 13px;
+        font-weight: 800;
       }
 
-      @media (max-width: 520px) {
-        .rum-submit-item {
-          flex-direction: column;
-          align-items: flex-start;
+      @media (max-width: 560px) {
+        .rum-submit-trigger {
+          padding-right: 14px;
         }
 
-        .rum-submit-link {
+        .rum-submit-card {
+          border-radius: 24px;
+        }
+
+        .rum-option {
+          grid-template-columns: 1fr;
+        }
+
+        .rum-option-link {
           width: 100%;
           text-align: center;
         }
       }
     </style>
 
-    <button type="button" class="submit-btn" id="rumSubmitBtn">📄 ${T.submit}</button>
+    <button type="button" class="rum-submit-trigger" id="rumSubmitBtn">
+      <span class="rum-submit-mark">✦</span>
+      <span class="rum-submit-label">
+        <span class="rum-submit-chip">${T.chip}</span>
+        <span class="rum-submit-text">${T.submit}</span>
+      </span>
+    </button>
 
-    <div id="rumSubmitModal">
+    <div class="rum-submit-modal" id="rumSubmitModal">
       <div class="rum-submit-card">
-        <div class="rum-submit-head">${T.chooseTitle}</div>
+        <div class="rum-submit-head">
+          <h2 class="rum-submit-title">${T.chooseTitle}</h2>
+          <p class="rum-submit-copy">${T.chooseText}</p>
+        </div>
         <div class="rum-submit-body">
-          <p class="rum-submit-text">${T.chooseText}</p>
-          <div class="rum-submit-list">
-            <div class="rum-submit-item">
-              <div class="rum-submit-meta">
-                <div class="rum-submit-name">${T.siteTitle}</div>
-                <div class="rum-submit-desc">${T.siteText}</div>
+          <div class="rum-option">
+            <div class="rum-option-main">
+              <div class="rum-option-icon">⌘</div>
+              <div>
+                <p class="rum-option-title">${T.siteTitle}</p>
+                <p class="rum-option-desc">${T.siteText}</p>
               </div>
-              <a class="rum-submit-link" href="${SITE_URL}">${T.open}</a>
             </div>
+            <a class="rum-option-link" href="${SITE_URL}">${T.open}</a>
+          </div>
 
-            <div class="rum-submit-item">
-              <div class="rum-submit-meta">
-                <div class="rum-submit-name">${T.tgTitle}</div>
-                <div class="rum-submit-desc">${T.tgText}</div>
+          <div class="rum-option">
+            <div class="rum-option-main">
+              <div class="rum-option-icon">✈</div>
+              <div>
+                <p class="rum-option-title">${T.tgTitle}</p>
+                <p class="rum-option-desc">${T.tgText}</p>
               </div>
-              <a class="rum-submit-link" href="${TELEGRAM_URL}" target="_blank" rel="noopener">${T.open}</a>
             </div>
+            <a class="rum-option-link" href="${TELEGRAM_URL}" target="_blank" rel="noopener">${T.open}</a>
           </div>
         </div>
         <div class="rum-submit-foot">
