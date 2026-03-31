@@ -5,7 +5,7 @@
   const BRAND_2 = "#245f97";
   const NUDGE_DELAY_MS = 9000;
   const NUDGE_KEY = "rum_ai_widget_nudge_v2";
-  const GITHUB_PAGES_BASE = "https://najmiddin4.github.io/Sanoatda-raqamli-texnologiyalar/telegrambot/widgets/rum_widget.html";
+  const STATIC_BASE = "https://archive.srt-journal.uz/telegrambot/widgets/rum_widget.html";
 
   function detectLang() {
     const raw = (document.documentElement.lang || "uz").toLowerCase();
@@ -23,9 +23,9 @@
       en: "Renaissance of Universal Mind — AI"
     },
     webAi: {
-      uz: GITHUB_PAGES_BASE + "?lang=uz",
-      ru: GITHUB_PAGES_BASE + "?lang=ru",
-      en: GITHUB_PAGES_BASE + "?lang=en"
+      uz: STATIC_BASE + "?lang=uz",
+      ru: STATIC_BASE + "?lang=ru",
+      en: STATIC_BASE + "?lang=en"
     },
     tgBot: "https://t.me/rum_editorial_bot",
     tgBotLabel: "@rum_editorial_bot",
