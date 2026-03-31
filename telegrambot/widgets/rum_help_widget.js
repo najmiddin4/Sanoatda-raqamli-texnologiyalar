@@ -5,6 +5,7 @@
   const BRAND_2 = "#245f97";
   const NUDGE_DELAY_MS = 9000;
   const NUDGE_KEY = "rum_ai_widget_nudge_v2";
+  const GITHUB_PAGES_BASE = "https://najmiddin4.github.io/Sanoatda-raqamli-texnologiyalar/telegrambot/widgets/rum_widget.html";
 
   function detectLang() {
     const raw = (document.documentElement.lang || "uz").toLowerCase();
@@ -22,9 +23,9 @@
       en: "Renaissance of Universal Mind — AI"
     },
     webAi: {
-      uz: "https://rum-journal.com/ai/rum_widget.html",
-      ru: "https://rum-journal.com/ai/rum_widget.html",
-      en: "https://rum-journal.com/ai/rum_widget.html"
+      uz: GITHUB_PAGES_BASE + "?lang=uz",
+      ru: GITHUB_PAGES_BASE + "?lang=ru",
+      en: GITHUB_PAGES_BASE + "?lang=en"
     },
     tgBot: "https://t.me/rum_editorial_bot",
     tgBotLabel: "@rum_editorial_bot",
@@ -104,7 +105,6 @@
   wrap.innerHTML = `
     <style>
       #rumHelpWrap * { box-sizing: border-box; }
-
       .rum-nudge {
         display: none;
         position: absolute;
@@ -120,7 +120,6 @@
         backdrop-filter: blur(18px);
         animation: rumFloatIn .3s ease;
       }
-
       .rum-nudge::after {
         content: "";
         position: absolute;
@@ -133,17 +132,8 @@
         border-bottom: 1px solid rgba(14,26,43,.08);
         transform: rotate(45deg);
       }
-
-      .rum-nudge-top {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-      }
-
-      .rum-nudge-copy {
-        flex: 1 1 auto;
-      }
-
+      .rum-nudge-top { display: flex; align-items: flex-start; gap: 10px; }
+      .rum-nudge-copy { flex: 1 1 auto; }
       .rum-nudge-chip {
         display: inline-flex;
         margin-bottom: 6px;
@@ -156,13 +146,7 @@
         letter-spacing: .14em;
         text-transform: uppercase;
       }
-
-      .rum-nudge-text {
-        font-size: 13px;
-        line-height: 1.45;
-        font-weight: 700;
-      }
-
+      .rum-nudge-text { font-size: 13px; line-height: 1.45; font-weight: 700; }
       .rum-nudge-close {
         width: 30px;
         height: 30px;
@@ -176,7 +160,6 @@
         justify-content: center;
         flex: 0 0 auto;
       }
-
       .rum-menu {
         display: none;
         margin-bottom: 12px;
@@ -188,7 +171,6 @@
         box-shadow: 0 22px 60px rgba(15,39,71,.16);
         backdrop-filter: blur(20px);
       }
-
       .rum-item {
         width: 100%;
         display: flex;
@@ -204,10 +186,8 @@
         cursor: pointer;
         transition: transform .18s ease, background .18s ease;
       }
-
       .rum-item:last-child { margin-bottom: 0; }
       .rum-item:hover { transform: translateY(-1px); background: #f7fbff; }
-
       .rum-ico {
         width: 38px;
         height: 38px;
@@ -219,10 +199,8 @@
         color: #245f97;
         flex: 0 0 auto;
       }
-
       .rum-title { font-size: 14px; font-weight: 800; line-height: 1.1; }
       .rum-sub { margin-top: 4px; font-size: 12px; color: #66768b; }
-
       .rum-box {
         display: none;
         margin-bottom: 12px;
@@ -235,7 +213,6 @@
         box-shadow: 0 26px 70px rgba(15,39,71,.2);
         backdrop-filter: blur(20px);
       }
-
       .rum-head {
         padding: 12px 14px;
         color: #fff;
@@ -244,14 +221,7 @@
         align-items: center;
         justify-content: space-between;
       }
-
-      .rum-head-left {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 0;
-      }
-
+      .rum-head-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
       .rum-logo {
         width: 30px;
         height: 30px;
@@ -261,7 +231,6 @@
         object-fit: contain;
         flex: 0 0 auto;
       }
-
       .rum-head-title {
         font-size: 13px;
         font-weight: 800;
@@ -269,7 +238,6 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
-
       .rum-close {
         width: 34px;
         height: 34px;
@@ -282,7 +250,6 @@
         align-items: center;
         justify-content: center;
       }
-
       .rum-main {
         display: inline-flex;
         align-items: center;
@@ -295,7 +262,6 @@
         box-shadow: 0 20px 42px rgba(15,39,71,.28);
         cursor: pointer;
       }
-
       .rum-main img {
         width: 38px;
         height: 38px;
@@ -304,14 +270,7 @@
         padding: 4px;
         object-fit: contain;
       }
-
-      .rum-main-copy {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1px;
-      }
-
+      .rum-main-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
       .rum-main-chip {
         font-size: 10px;
         letter-spacing: .14em;
@@ -319,24 +278,10 @@
         opacity: .68;
         font-weight: 800;
       }
-
-      .rum-main-label {
-        font-size: 14px;
-        font-weight: 800;
-      }
-
+      .rum-main-label { font-size: 14px; font-weight: 800; }
       .rum-main.rum-attention { animation: rumPulse 1.7s ease-in-out infinite; }
-
-      @keyframes rumPulse {
-        0%,100% { transform: scale(1); }
-        50% { transform: scale(1.03); }
-      }
-
-      @keyframes rumFloatIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-
+      @keyframes rumPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+      @keyframes rumFloatIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
       @media (max-width: 420px) {
         .rum-menu { width: 292px; }
         .rum-box { width: 320px; height: 510px; }
