@@ -1,7 +1,27 @@
 <?php
 declare(strict_types=1);
 
-header("Content-Type: application/json; charset=utf-8");
+$allowedOrigins = [
+    'https://archive.srt-journal.uz',
+    'http://archive.srt-journal.uz',
+    'https://rum-journal.com',
+    'http://rum-journal.com',
+];
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins, true)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Vary: Origin');
+}
+
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+header('Content-Type: application/json; charset=utf-8');
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
 
 $promptDir = __DIR__ . "/prompts";
 
