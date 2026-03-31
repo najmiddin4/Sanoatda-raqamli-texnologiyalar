@@ -1,15 +1,23 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify, make_response
+import json
 import os
 import requests as req
-import json
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "rum_secret_2026")
 ADMIN_GROUP_ID = os.getenv("ADMIN_GROUP_ID")
-API_URL = f"https://api.telegram.org/bot{TOKEN}"
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+API_URL = f"https://api.telegram.org/bot{TOKEN}" if TOKEN else None
+PROMPT_DIR = os.path.join(os.path.dirname(__file__), "prompts")
+ALLOWED_ORIGINS = {
+    "https://archive.srt-journal.uz",
+    "http://archive.srt-journal.uz",
+    "https://rum-journal.com",
+    "http://rum-journal.com",
+}
 
 app = Flask(__name__)
-
 user_states = {}
 
 TEXTS = {
@@ -29,10 +37,14 @@ TEXTS = {
         "cancel": "❌ Bekor qilish",
         "submitted": "✅ Maqolangiz muvaffaqiyatli yuborildi! Tez orada javob beramiz.",
         "rules_text": "📋 *Qoidalar*\n\n1. Maqola ilmiy bo'lishi kerak\n2. Plagiat 15% dan oshmasligi kerak\n3. Hajmi 5-15 sahifa\n4. Format: APA 7",
-        "contact_text": "📞 *Aloqa*\n\nEmail: info@rum.uz\nTelegram: @rum\_admin",
+        "contact_text": "📞 *Aloqa*\n\nEmail: info@rum.uz\nTelegram: @rum_admin",
         "admin_header": "📨 *Yangi maqola yuborildi!*\n\n",
         "article_file_caption": "📎 *Maqola fayli*",
         "plagiat_caption": "📊 *Plagiat hisoboti*",
+        "ai_unavailable": "AI xizmati hozircha sozlanmagan. Keyinroq urinib ko'ring.",
+        "ai_connection_error": "Ulanishda muammo yuz berdi. Keyinroq qayta urinib ko'ring.",
+        "ai_service_error": "AI xizmatidan javob olinmadi. Keyinroq qayta urinib ko'ring.",
+        "ai_empty_error": "Javob olinmadi. Qayta urinib ko'ring.",
     },
     "ru": {
         "welcome": "👋 Добро пожаловать в бот RUM Publishing!\n\nПожалуйста, выберите язык:",
@@ -50,10 +62,14 @@ TEXTS = {
         "cancel": "❌ Отмена",
         "submitted": "✅ Ваша статья успешно отправлена! Ответим в ближайшее время.",
         "rules_text": "📋 *Правила*\n\n1. Статья должна быть научной\n2. Плагиат не более 15%\n3. Объём 5-15 страниц\n4. Формат: APA 7",
-        "contact_text": "📞 *Контакты*\n\nEmail: info@rum.uz\nTelegram: @rum\_admin",
+        "contact_text": "📞 *Контакты*\n\nEmail: info@rum.uz\nTelegram: @rum_admin",
         "admin_header": "📨 *Новая статья отправлена!*\n\n",
         "article_file_caption": "📎 *Файл статьи*",
         "plagiat_caption": "📊 *Отчёт о плагиате*",
+        "ai_unavailable": "AI сервис пока не настроен. Попробуйте позже.",
+        "ai_connection_error": "Проблема с подключением. Попробуйте позже.",
+        "ai_service_error": "Ответ от AI сервиса не получен. Попробуйте позже.",
+        "ai_empty_error": "Ответ не получен. Попробуйте ещё раз.",
     },
     "en": {
         "welcome": "👋 Welcome to RUM Publishing bot!\n\nPlease select your language:",
@@ -71,10 +87,14 @@ TEXTS = {
         "cancel": "❌ Cancel",
         "submitted": "✅ Your article has been submitted! We will respond shortly.",
         "rules_text": "📋 *Rules*\n\n1. Article must be scientific\n2. Plagiarism no more than 15%\n3. Length: 5-15 pages\n4. Format: APA 7",
-        "contact_text": "📞 *Contact*\n\nEmail: info@rum.uz\nTelegram: @rum\_admin",
+        "contact_text": "📞 *Contact*\n\nEmail: info@rum.uz\nTelegram: @rum_admin",
         "admin_header": "📨 *New article submitted!*\n\n",
         "article_file_caption": "📎 *Article file*",
         "plagiat_caption": "📊 *Plagiarism report*",
+        "ai_unavailable": "The AI service is not configured yet. Please try again later.",
+        "ai_connection_error": "Connection problem. Please try again later.",
+        "ai_service_error": "No response from the AI service. Please try again later.",
+        "ai_empty_error": "No response received. Please try again.",
     },
 }
 
@@ -87,8 +107,85 @@ STATE_ARTICLE_FILE = "article_file"
 STATE_ARTICLE_PLAGIAT = "article_plagiat"
 
 
+def normalize_lang(value):
+    value = (value or "uz").strip().lower()
+    return value if value in {"uz", "ru", "en"} else "uz"
+
+
+def normalize_journal(value):
+    value = (value or "DEFAULT").strip().upper()
+    return value if value in {"ITJ", "ME", "IE", "RUM", "DEFAULT"} else "DEFAULT"
+
+
+def get_prompt_candidates(journal, lang):
+    journal = journal.lower()
+    return [
+        os.path.join(PROMPT_DIR, f"{journal}_{lang}.txt"),
+        os.path.join(PROMPT_DIR, f"{journal}_uz.txt"),
+        os.path.join(PROMPT_DIR, f"default_{lang}.txt"),
+        os.path.join(PROMPT_DIR, "default_uz.txt"),
+    ]
+
+
+def load_prompt(journal, lang):
+    for file_path in get_prompt_candidates(journal, lang):
+        if os.path.isfile(file_path):
+            with open(file_path, "r", encoding="utf-8") as handle:
+                content = handle.read().strip()
+            if content:
+                return content
+    return "You are an official AI assistant for a scientific journal. Answer clearly, briefly, and only within official journal information."
+
+
+def make_ai_error(lang, key):
+    return TEXTS[lang].get(key, TEXTS["uz"][key])
+
+
+def ask_openai(message, prompt, lang):
+    if not OPENAI_API_KEY:
+        return False, make_ai_error(lang, "ai_unavailable")
+
+    payload = {
+        "model": OPENAI_MODEL,
+        "messages": [
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": message},
+        ],
+        "temperature": 0.3,
+    }
+
+    try:
+        response = req.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {OPENAI_API_KEY}",
+            },
+            json=payload,
+            timeout=60,
+        )
+    except req.RequestException:
+        return False, make_ai_error(lang, "ai_connection_error")
+
+    if response.status_code >= 400:
+        return False, make_ai_error(lang, "ai_service_error")
+
+    data = response.json()
+    content = data.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+    if not content:
+        return False, make_ai_error(lang, "ai_empty_error")
+
+    return True, content
+
+
 def api(method, **kwargs):
-    req.post(f"{API_URL}/{method}", data={k: (json.dumps(v) if isinstance(v, dict) else v) for k, v in kwargs.items()})
+    if not API_URL:
+        return None
+    return req.post(
+        f"{API_URL}/{method}",
+        data={k: (json.dumps(v) if isinstance(v, dict) else v) for k, v in kwargs.items()},
+        timeout=30,
+    )
 
 
 def send_msg(chat_id, text, keyboard=None):
@@ -178,28 +275,22 @@ def handle_callback(chat_id, user_id, username, cb_data, cb_id):
         user_states[user_id]["lang"] = new_lang
         user_states[user_id]["state"] = STATE_MAIN_MENU
         send_msg(chat_id, TEXTS[new_lang]["main_menu"], keyboard=main_menu_keyboard(new_lang))
-
     elif cb_data == "change_lang":
         user_states[user_id]["state"] = STATE_SELECT_LANG
         send_msg(chat_id, TEXTS["uz"]["welcome"], keyboard=lang_keyboard())
-
     elif cb_data == "submit_article":
         user_states[user_id]["data"] = {}
         user_states[user_id]["state"] = STATE_ARTICLE_TITLE
         send_msg(chat_id, f"*{t['submit_article']}* (1/5)\n\n{t['ask_title']}", keyboard=cancel_keyboard(lang))
-
     elif cb_data == "rules":
         send_msg(chat_id, t["rules_text"])
         show_main_menu(chat_id, user_id)
-
     elif cb_data == "contact":
         send_msg(chat_id, t["contact_text"])
         show_main_menu(chat_id, user_id)
-
     elif cb_data == "cancel":
         user_states[user_id]["data"] = {}
         show_main_menu(chat_id, user_id)
-
     elif cb_data == "skip" and state["state"] == STATE_ARTICLE_PLAGIAT:
         forward_to_admin(user_id, username, state["data"], lang)
         user_states[user_id]["data"] = {}
@@ -210,45 +301,83 @@ def handle_callback(chat_id, user_id, username, cb_data, cb_id):
 
 def handle_message(chat_id, user_id, username, text, document):
     state = get_state(user_id)
-    s = state["state"]
+    current_state = state["state"]
     lang = state["lang"]
     t = TEXTS[lang]
 
-    if s == STATE_ARTICLE_TITLE and text:
+    if current_state == STATE_ARTICLE_TITLE and text:
         user_states[user_id]["data"]["title"] = text
         user_states[user_id]["state"] = STATE_ARTICLE_AUTHORS
         send_msg(chat_id, f"*{t['submit_article']}* (2/5)\n\n{t['ask_authors']}", keyboard=cancel_keyboard(lang))
-
-    elif s == STATE_ARTICLE_AUTHORS and text:
+    elif current_state == STATE_ARTICLE_AUTHORS and text:
         user_states[user_id]["data"]["authors"] = text
         user_states[user_id]["state"] = STATE_ARTICLE_ANNOTATION
         send_msg(chat_id, f"*{t['submit_article']}* (3/5)\n\n{t['ask_annotation']}", keyboard=cancel_keyboard(lang))
-
-    elif s == STATE_ARTICLE_ANNOTATION and text:
+    elif current_state == STATE_ARTICLE_ANNOTATION and text:
         user_states[user_id]["data"]["annotation"] = text
         user_states[user_id]["state"] = STATE_ARTICLE_FILE
         send_msg(chat_id, f"*{t['submit_article']}* (4/5)\n\n{t['ask_file']}", keyboard=cancel_keyboard(lang))
-
-    elif s == STATE_ARTICLE_FILE and document:
+    elif current_state == STATE_ARTICLE_FILE and document:
         user_states[user_id]["data"]["article_file"] = document
         user_states[user_id]["state"] = STATE_ARTICLE_PLAGIAT
         send_msg(chat_id, f"*{t['submit_article']}* (5/5)\n\n{t['ask_plagiat']}", keyboard=skip_cancel_keyboard(lang))
-
-    elif s == STATE_ARTICLE_PLAGIAT and document:
+    elif current_state == STATE_ARTICLE_PLAGIAT and document:
         user_states[user_id]["data"]["plagiat_file"] = document
         forward_to_admin(user_id, username, state["data"], lang)
         user_states[user_id]["data"] = {}
         user_states[user_id]["state"] = STATE_MAIN_MENU
         send_msg(chat_id, t["submitted"])
         show_main_menu(chat_id, user_id)
-
     else:
         show_main_menu(chat_id, user_id)
+
+
+def build_cors_preflight_response():
+    response = make_response("", 204)
+    add_cors_headers(response)
+    return response
+
+
+def add_cors_headers(response):
+    origin = request.headers.get("Origin", "")
+    if origin in ALLOWED_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
+    response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return response
 
 
 @app.route("/")
 def index():
     return "RUM bot is running."
+
+
+@app.route("/api/ai", methods=["POST", "OPTIONS"])
+def ai_api():
+    if request.method == "OPTIONS":
+        return build_cors_preflight_response()
+
+    data = request.get_json(silent=True) or {}
+    message = str(data.get("message", "")).strip()
+    journal = normalize_journal(data.get("journal"))
+    lang = normalize_lang(data.get("lang"))
+
+    if not message:
+        response = jsonify({"error": "Empty message"})
+        response.status_code = 400
+        return add_cors_headers(response)
+
+    prompt = load_prompt(journal, lang)
+    ok, reply = ask_openai(message, prompt, lang)
+    status = 200 if ok else 503
+    response = jsonify({
+        "reply": reply,
+        "journal": journal,
+        "lang": lang,
+    })
+    response.status_code = status
+    return add_cors_headers(response)
 
 
 @app.route(f"/webhook/{WEBHOOK_SECRET}", methods=["POST"])
