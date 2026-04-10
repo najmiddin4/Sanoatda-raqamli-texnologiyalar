@@ -5,80 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hisoblash Platformasi</title>
   <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      background: linear-gradient(135deg, #f9f5ee, #e9dcc4);
-      color: #2e2418;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-    }
-
-    .wrap {
-      width: min(900px, 100%);
-      background: rgba(255, 250, 242, 0.94);
-      border: 1px solid #d9c5a3;
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 18px 36px rgba(73, 53, 21, 0.14);
-    }
-
-    h1 {
-      margin: 0 0 12px;
-      font-size: clamp(28px, 4vw, 42px);
-    }
-
-    p {
-      margin: 0 0 22px;
-      line-height: 1.7;
-      color: #625744;
-    }
-
-    a {
-      display: block;
-      text-decoration: none;
-      color: inherit;
-      background: #fff4df;
-      border: 1px solid #d9c5a3;
-      border-radius: 18px;
-      padding: 18px;
-      transition: transform 0.16s ease, box-shadow 0.16s ease;
-    }
-
-    a:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 24px rgba(73, 53, 21, 0.10);
-    }
-
-    strong {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 20px;
-      color: #5a3d12;
-    }
-
-    span {
-      color: #625744;
-      line-height: 1.6;
-    }
+    :root { --card:rgba(255,251,244,.95); --line:#d8c7ab; --text:#2b241c; --muted:#6a5d4a; --accent:#8d5a1f; --accent-dark:#5d3810; --shadow:0 22px 44px rgba(60,40,16,.14); }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:"Segoe UI",Tahoma,sans-serif; color:var(--text); background:radial-gradient(circle at top left, rgba(184,143,77,.22), transparent 28%), linear-gradient(135deg,#fcf8f2,#efe3d0 55%,#e5d3b6); }
+    .page { width:min(1120px,calc(100% - 28px)); margin:28px auto 36px; }
+    .hero,.list { background:var(--card); border:1px solid rgba(216,199,171,.9); border-radius:28px; box-shadow:var(--shadow); backdrop-filter:blur(10px); }
+    .hero { padding:32px; margin-bottom:20px; }
+    .hero h1 { margin:0 0 12px; font-size:clamp(30px,4vw,48px); line-height:1.05; }
+    .hero p { margin:0; max-width:860px; color:var(--muted); line-height:1.75; font-size:16px; }
+    .list { padding:22px; display:grid; gap:16px; }
+    .program { display:block; text-decoration:none; color:inherit; border:1px solid var(--line); border-radius:22px; padding:20px; background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,245,230,.96)); transition:transform .16s ease, box-shadow .16s ease; }
+    .program:hover { transform:translateY(-2px); box-shadow:0 14px 28px rgba(60,40,16,.10); }
+    .program strong { display:block; margin-bottom:8px; font-size:21px; color:var(--accent-dark); }
+    .program span { display:block; color:var(--muted); line-height:1.65; }
+    .program em { display:inline-block; margin-top:12px; font-style:normal; font-weight:700; color:var(--accent); }
+    @media (max-width:640px) { .page { width:min(100% - 18px,1120px); margin-top:14px; } .hero,.list { border-radius:22px; } .hero { padding:22px; } .list { padding:14px; } .program { padding:16px; } }
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <h1>Hisoblash platformasi</h1>
-    <p>Bu sahifada boyitish jarayonlariga oid alohida hisoblash dasturlari jamlanadi. Har bir dastur o'zining ichki papkasida saqlanadi va brauzerda to'g'ridan-to'g'ri ishlaydi.</p>
-
-    <a href="./1/DGU_1.html">
-      <strong>1-dastur: Nikel tarkibli rudalarni boyitish hisobi</strong>
-      <span>Boyitma chiqishi, chiqindi massasi, metall ajralishi va ruda unumdorligi asosida hisoblovchi onlayn HTML dastur.</span>
-    </a>
-
-    <a href="./2/DGU_2.html" style="margin-top: 16px;">
-      <strong>2-dastur: Nikel tarkibli rudalarni boyitishda chiqindi chiqishini hisoblash</strong>
-      <span>Chiqindi chiqishi, chiqindi massasi, boyitmaga ajralgan massa va ruda unumdorligi asosida hisoblovchi onlayn HTML dastur.</span>
-    </a>
+  <main class="page">
+    <section class="hero">
+      <h1>Hisoblash platformasi</h1>
+      <p>Bu platformada nikel tarkibli rudalarni boyitish jarayonlariga oid interaktiv hisoblash dasturlari jamlangan. Har bir dastur alohida mavzuga mo'ljallangan bo'lib, kirish ma'lumotlari asosida natijalarni avtomatik hisoblab beradi.</p>
+    </section>
+    <section class="list">
+      <a class="program" href="./1/DGU_1.html"><strong>1-dastur: Boyitma chiqishini hisoblash</strong><span>Nikel tarkibli rudalarni boyitishda boyitmaning chiqishi, boyitma massasi, chiqindi massasi va metall ajralishini ruda unumdorligi asosida hisoblaydi.</span><em>Dasturga o'tish</em></a>
+      <a class="program" href="./2/DGU_2.html"><strong>2-dastur: Chiqindi chiqishini hisoblash</strong><span>Nikel tarkibli rudalarni boyitishda chiqindining chiqishi, chiqindi massasi, boyitmaga ajralgan massa va chiqindidagi nikel miqdorini hisoblaydi.</span><em>Dasturga o'tish</em></a>
+      <a class="program" href="./3/DGU_3.html"><strong>3-dastur: Foydali komponent miqdoriga ko'ra boyitma chiqishini hisoblash</strong><span>Rudadagi va boyitmadagi foydali komponent miqdoridan foydalanib boyitma chiqishini, boyitma massasini va foydali komponentning boyitmaga o'tishini hisoblaydi.</span><em>Dasturga o'tish</em></a>
+      <a class="program" href="./4/DGU_4.html"><strong>4-dastur: Foydali komponent miqdoriga ko'ra chiqindi chiqishini hisoblash</strong><span>Rudadagi va chiqindidagi foydali komponent miqdoridan foydalanib chiqindi chiqishini, chiqindi massasini va boyitmaga ajralgan massani hisoblaydi.</span><em>Dasturga o'tish</em></a>
+      <a class="program" href="./5/DGU_5.html"><strong>5-dastur: Nikel rudalarini maydalash darajasini aniqlash</strong><span>Dastlabki va yakuniy zarracha o'lchamiga ko'ra maydalash darajasi, maydalash koeffitsienti va fraksiya o'zgarishini hisoblaydi.</span><em>Dasturga o'tish</em></a>
+      <a class="program" href="./6/DGU_6.html"><strong>6-dastur: Sulfidli nikel rudalarida boyitish darajasini aniqlash</strong><span>Flotatsiya usulida boyitishda boyitish darajasi, boyitma sifati va flotatsiya samaradorligini aniqlaydi.</span><em>Dasturga o'tish</em></a>
+      <a class="program" href="./7/DGU_7.html"><strong>7-dastur: Foydali komponentning mahsulotlarga ajralishini aniqlash</strong><span>Boyitma va boshqa mahsulotlarga foydali komponentning taqsimlanishini, ajralish ulushlarini va mahsulotlar bo'yicha komponent massasini hisoblaydi.</span><em>Dasturga o'tish</em></a>
+      <a class="program" href="./8/DGU_8.html"><strong>8-dastur: Foydali komponentning chiqindiga ajralishini aniqlash</strong><span>Foydali komponentning chiqindiga o'tgan qismi, chiqindidagi komponent massasi va yo'qotish foizini aniqlaydi.</span><em>Dasturga o'tish</em></a>
+    </section>
   </main>
 </body>
 </html>
