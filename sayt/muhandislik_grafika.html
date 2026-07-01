@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Muhandislik va Kompyuter Grafikasi — Interaktiv O'quv Dasturi</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Sans+3:wght@300;400;600&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --ink:    #1a1f2e;
+    --steel:  #2e4a6b;
+    --cyan:   #00bcd4;
+    --amber:  #f5a623;
+    --paper:  #f0f4f8;
+    --white:  #ffffff;
+    --grid:   #dce5ef;
+    --ok:     #2ecc71;
+    --err:    #e74c3c;
+    --radius: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--steel);
+    color: var(--white);
+    padding: 0 0 0 0;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  }
+  .header-top {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 32px;
+  }
+  .header-icon {
+    width: 48px; height: 48px;
+    background: var(--cyan);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+  }
+  .header-text h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.3rem; font-weight: 700;
+    letter-spacing: .5px;
+  }
+  .header-text p {
+    font-size: .8rem; opacity: .75; margin-top: 2px;
+  }
+
+  /* ── Tab nav ── */
+  nav.tabs {
+    display: flex; overflow-x: auto;
+    background: rgba(0,0,0,.2);
+    padding: 0 20px;
+    scrollbar-width: none;
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs button {
+    background: none; border: none;
+    color: rgba(255,255,255,.7);
+    font-family: 'Oswald', sans-serif;
+    font-size: .9rem; font-weight: 600;
+    letter-spacing: .4px;
+    padding: 10px 20px;
+    cursor: pointer; white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: all .2s;
+  }
+  nav.tabs button.active,
+  nav.tabs button:hover {
+    color: var(--cyan);
+    border-bottom-color: var(--cyan);
+  }
+
+  /* ── Main ── */
+  main { padding: 28px 24px; max-width: 1100px; margin: 0 auto; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Section cards ── */
+  .section-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.35rem; font-weight: 700;
+    color: var(--steel);
+    border-left: 4px solid var(--cyan);
+    padding-left: 12px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 22px 24px;
+    margin-bottom: 20px;
+  }
+  .card h3 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.05rem; color: var(--steel);
+    margin-bottom: 12px;
+  }
+  .card p, .card li {
+    font-size: .92rem; line-height: 1.65;
+    color: #3a4560;
+  }
+  .card ul, .card ol { padding-left: 20px; }
+  .card li { margin-bottom: 5px; }
+
+  /* ── Theory badge ── */
+  .badge {
+    display: inline-block;
+    background: var(--cyan);
+    color: var(--white);
+    font-size: .72rem; font-weight: 700;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: .6px;
+    padding: 2px 8px; border-radius: 3px;
+    margin-right: 6px; margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .badge.amber { background: var(--amber); }
+  .badge.steel { background: var(--steel); }
+
+  /* ══════════════════════════════
+     DRAWING CANVAS SECTION
+  ══════════════════════════════ */
+  .draw-wrap {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  @media(max-width:700px){ .draw-wrap { grid-template-columns: 1fr; } }
+
+  .tools-panel {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  }
+  .tools-panel h4 {
+    font-family: 'Oswald', sans-serif;
+    font-size: .9rem; color: var(--steel);
+    margin-bottom: 10px;
+  }
+  .tool-btn {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%; padding: 8px 10px;
+    background: var(--paper); border: none;
+    border-radius: 4px; cursor: pointer;
+    font-size: .85rem; color: var(--ink);
+    margin-bottom: 5px; transition: background .15s;
+    font-family: 'Source Sans 3', sans-serif;
+  }
+  .tool-btn:hover, .tool-btn.active {
+    background: var(--steel); color: var(--white);
+  }
+  .tool-btn span { font-size: 1.1rem; }
+
+  .color-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .color-dot {
+    width: 24px; height: 24px; border-radius: 50%;
+    cursor: pointer; border: 2px solid transparent;
+    transition: border-color .15s;
+  }
+  .color-dot.selected { border-color: var(--amber); }
+
+  label.ctrl { font-size: .8rem; color: #666; display: block; margin-top: 8px; }
+  input[type=range] { width: 100%; margin-top: 3px; accent-color: var(--steel); }
+
+  canvas#drawCanvas {
+    background: #fff;
+    border: 2px solid var(--grid);
+    border-radius: var(--radius);
+    cursor: crosshair;
+    display: block;
+    width: 100%;
+    touch-action: none;
+  }
+
+  .canvas-actions {
+    margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .btn {
+    padding: 8px 18px; border-radius: 4px; border: none;
+    cursor: pointer; font-size: .85rem; font-weight: 600;
+    font-family: 'Source Sans 3', sans-serif;
+    transition: opacity .15s;
+  }
+  .btn:hover { opacity: .85; }
+  .btn-primary { background: var(--steel); color: var(--white); }
+  .btn-amber   { background: var(--amber); color: var(--white); }
+  .btn-outline {
+    background: none; border: 2px solid var(--steel);
+    color: var(--steel);
+  }
+
+  /* ══════════════════════════════
+     PROJECTION / 3D VIEWS
+  ══════════════════════════════ */
+  .views-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  @media(max-width:600px){ .views-grid { grid-template-columns: 1fr; } }
+
+  .view-box {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    padding: 14px;
+  }
+  .view-box h4 {
+    font-family: 'Oswald', sans-serif;
+    font-size: .88rem; color: var(--steel);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  }
+  .view-box canvas { display: block; width: 100%; }
+
+  /* ══════════════════════════════
+     TASKS
+  ══════════════════════════════ */
+  .task-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .task-header {
+    background: var(--steel);
+    color: var(--white);
+    padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .task-header h3 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem; font-weight: 600;
+  }
+  .diff {
+    font-size: .75rem; font-weight: 700;
+    padding: 2px 9px; border-radius: 20px;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: .4px;
+  }
+  .diff.easy   { background: var(--ok);    color: #fff; }
+  .diff.medium { background: var(--amber); color: #fff; }
+  .diff.hard   { background: var(--err);   color: #fff; }
+
+  .task-body { padding: 18px 20px; }
+  .task-body p { font-size: .9rem; line-height: 1.6; margin-bottom: 10px; }
+
+  .task-svg-wrap {
+    background: var(--paper);
+    border-radius: 4px;
+    padding: 14px;
+    margin: 12px 0;
+    display: flex; justify-content: center;
+  }
+  .task-svg-wrap svg { max-width: 100%; }
+
+  .task-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media(max-width:480px){ .task-options { grid-template-columns: 1fr; } }
+
+  .opt-btn {
+    padding: 9px 12px;
+    background: var(--paper); border: 2px solid var(--grid);
+    border-radius: 4px; cursor: pointer;
+    font-size: .87rem; font-family: 'Source Sans 3', sans-serif;
+    text-align: left; transition: all .15s;
+  }
+  .opt-btn:hover { border-color: var(--steel); background: #e8f0fa; }
+  .opt-btn.correct { background: #d4f5e2; border-color: var(--ok); color: #155724; }
+  .opt-btn.wrong   { background: #fde8e8; border-color: var(--err); color: #721c24; }
+
+  .feedback {
+    margin-top: 10px; padding: 10px 14px;
+    border-radius: 4px; font-size: .88rem; font-weight: 600;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok  { background: #d4f5e2; color: #155724; }
+  .feedback.bad { background: #fde8e8; color: #721c24; }
+
+  /* ══════════════════════════════
+     GLOSSARY
+  ══════════════════════════════ */
+  .glossary-search {
+    display: flex; gap: 8px; margin-bottom: 16px;
+  }
+  .glossary-search input {
+    flex: 1; padding: 9px 14px;
+    border: 2px solid var(--grid); border-radius: 4px;
+    font-size: .9rem; font-family: 'Source Sans 3', sans-serif;
+    outline: none;
+  }
+  .glossary-search input:focus { border-color: var(--steel); }
+
+  .gloss-item {
+    padding: 12px 16px;
+    border-left: 3px solid var(--cyan);
+    background: var(--white);
+    border-radius: 0 4px 4px 0;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .gloss-item dt {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .88rem; font-weight: 600;
+    color: var(--steel); margin-bottom: 3px;
+  }
+  .gloss-item dd {
+    font-size: .88rem; color: #3a4560; line-height: 1.5;
+  }
+
+  /* ══════════════════════════════
+     PROGRESS
+  ══════════════════════════════ */
+  .progress-bar-wrap {
+    background: var(--grid); border-radius: 20px;
+    height: 12px; overflow: hidden; margin: 6px 0 3px;
+  }
+  .progress-bar {
+    height: 100%; background: var(--cyan);
+    border-radius: 20px; transition: width .4s;
+  }
+
+  .score-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px; margin-bottom: 20px;
+  }
+  .score-box {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 18px 14px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  }
+  .score-box .num {
+    font-family: 'Oswald', sans-serif;
+    font-size: 2rem; font-weight: 700;
+    color: var(--steel);
+  }
+  .score-box p { font-size: .8rem; color: #666; margin-top: 3px; }
+
+  /* ══════════════════════════════
+     FORMULA TABLE
+  ══════════════════════════════ */
+  .formula-table {
+    width: 100%; border-collapse: collapse;
+    font-size: .88rem;
+  }
+  .formula-table th {
+    background: var(--steel); color: var(--white);
+    padding: 9px 12px; text-align: left;
+    font-family: 'Oswald', sans-serif; font-weight: 600;
+  }
+  .formula-table td {
+    padding: 9px 12px; border-bottom: 1px solid var(--grid);
+    vertical-align: top;
+  }
+  .formula-table tr:nth-child(even) td { background: var(--paper); }
+  .formula-table code {
+    font-family: 'JetBrains Mono', monospace;
+    background: #eef2fa; padding: 1px 5px; border-radius: 3px;
+    font-size: .85rem; color: var(--steel);
+  }
+
+  /* ══════════════════════════════
+     FOOTER
+  ══════════════════════════════ */
+  footer {
+    text-align: center; padding: 24px;
+    font-size: .8rem; color: #999;
+    border-top: 1px solid var(--grid);
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="header-icon">📐</div>
+    <div class="header-text">
+      <h1>Muhandislik va Kompyuter Grafikasi</h1>
+      <p>Boymuratov F.X. — Kognitiv qiziqishlarni rivojlantirish metodikasi | Interaktiv o'quv tizimi</p>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="active" onclick="showTab('nazariya',this)">📚 Nazariya</button>
+    <button onclick="showTab('chizma',this)">✏️ Chizma Doskasi</button>
+    <button onclick="showTab('proyeksiya',this)">📦 Proyeksiyalar</button>
+    <button onclick="showTab('topshiriqlar',this)">🧩 Topshiriqlar</button>
+    <button onclick="showTab('formulalar',this)">∑ Formulalar</button>
+    <button onclick="showTab('lug\'at',this)">📖 Lugʻat</button>
+    <button onclick="showTab('progress',this)">📊 Natijalar</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ══════════════════ NAZARIYA ══════════════════ -->
+<div id="tab-nazariya" class="tab-panel active">
+  <h2 class="section-title">Nazariy asoslar</h2>
+
+  <div class="card">
+    <span class="badge">1-Mavzu</span>
+    <h3>Muhandislik grafikasi faniga kirish</h3>
+    <p>Muhandislik grafikasi — texnik qurilmalar, inshootlar va mexanizmlarni grafik usulda tasvirlash ilmidir. U ikki asosiy bo'limdan iborat: <strong>Chizma geometriya</strong> (geometrik shakllar va jismlarni tekislikda aks ettirish) va <strong>Muhandislik chizmachiligi</strong> (GOST standartlariga muvofiq texnik hujjatlar tuzish).</p>
+  </div>
+
+  <div class="card">
+    <span class="badge steel">2-Mavzu</span>
+    <h3>Chizma chiziqlarining turlari (GOST 2.303-68)</h3>
+    <ul>
+      <li><strong>Asosiy qo'yiq chiziq</strong> — ko'rinadigan konturlar (qalinlik: S = 0.5–1.4 mm)</li>
+      <li><strong>Ingichka chiziq</strong> — o'lchov, ko'rsatma va shtrixlash chiziqlari (S/3...S/2)</li>
+      <li><strong>Shtrix-chiziq (nuqtali)</strong> — o'q va simmetriya chiziqlari (S/2 qalinlik)</li>
+      <li><strong>Shtrix-shtrix chiziq</strong> — ko'rinmaydigan konturlar (S/2 qalinlik)</li>
+      <li><strong>To'lqinli ingichka chiziq</strong> — uzilish chiziqlari (erkin qo'l bilan)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <span class="badge amber">3-Mavzu</span>
+    <h3>Monge proyeksiyasi — asosiy tushunchalar</h3>
+    <p>Fransuz matematiki Gaspar Monge (1746–1818) ishlab chiqqan usul bo'yicha fazodagi jism uchta o'zaro perpendikulyar proyeksiya tekisliklariga tushiriladi:</p>
+    <ul>
+      <li>📍 <strong>H (gorizontal)</strong> — yuqoridan ko'rinish (plan)</li>
+      <li>📍 <strong>V (frontal)</strong> — olddan ko'rinish (fasad)</li>
+      <li>📍 <strong>W (profil)</strong> — o'ngdan ko'rinish (profil)</li>
+    </ul>
+    <p style="margin-top:10px; padding:10px; background:var(--paper); border-radius:4px; font-size:.88rem;">
+      <strong>Epyur</strong> — uch proyeksiyani bitta tekislikda joylashtirilgan grafik tasvir. Frontal proyeksiya markazda, gorizontal ostida, profil o'ng tomonda joylashadi.
+    </p>
+  </div>
+
+  <div class="card">
+    <span class="badge">4-Mavzu</span>
+    <h3>Ko'rinishlar, kesimlar va qirqimlar</h3>
+    <ul>
+      <li><strong>Asosiy ko'rinishlar (6 ta)</strong> — old, orqa, yuqori, quyi, o'ng, chap</li>
+      <li><strong>Qirqim</strong> — jismni shartli ravishda kesganda ichki tuzilish ko'rinishi</li>
+      <li><strong>Kesim</strong> — qirqish tekisligidagi faqat kesuvchi qism tasviri</li>
+      <li><strong>Shtrixlash burchagi</strong> — metall uchun 45°, yog'och uchun uzunlama yo'nalishda</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <span class="badge steel">5-Mavzu</span>
+    <h3>Aksonometrik proyeksiyalar</h3>
+    <ul>
+      <li>🔷 <strong>Izometrik</strong> — barcha o'q burchaklari 120°, koeffitsient 0.82 (amalda 1)</li>
+      <li>🔶 <strong>Dimetrik</strong> — X va Z o'qlari 7°/41°, Y o'qi 0.5 masshtab</li>
+      <li>🔹 <strong>Kabinetli</strong> — Y o'qi 45°, 0.5 masshtab; sodda qurilmalar uchun</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <span class="badge amber">Kompyuter Grafikasi</span>
+    <h3>AutoCAD / KOMPAS-3D asoslari</h3>
+    <p>Kompyuter grafikasida muhandislik chizmalari quyidagi usullar bilan yaratiladi:</p>
+    <ol>
+      <li>2D chizish: chiziqlar, yoylar, poligonlar, shtrixlash buyruqlari</li>
+      <li>3D modellashtirish: ekstruziya, revolyutsiya, bo'sh qoldirish operatsiyalari</li>
+      <li>Chizma varaqlarini rasmiylashtirish: ramka, shtamp, o'lchamlar, belgilar</li>
+      <li>Fayllarni eksport: DWG, PDF, STEP, IGES formatlar</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ══════════════════ CHIZMA DOSKASI ══════════════════ -->
+<div id="tab-chizma" class="tab-panel">
+  <h2 class="section-title">Interaktiv Chizma Doskasi</h2>
+  <p style="font-size:.88rem;color:#555;margin-bottom:14px;">
+    Muhandislik chizmalarini virtual doska ustida mashq qiling. Asosiy chiziq turlarini tanlang va erkin chizing.
+  </p>
+
+  <div class="draw-wrap">
+    <!-- Tools -->
+    <div class="tools-panel">
+      <h4>🛠 Asboblar</h4>
+      <button class="tool-btn active" id="toolPen" onclick="setTool('pen',this)"><span>✏️</span> Chiziq</button>
+      <button class="tool-btn" id="toolLine" onclick="setTool('line',this)"><span>📏</span> To'g'ri chiziq</button>
+      <button class="tool-btn" id="toolRect" onclick="setTool('rect',this)"><span>⬛</span> To'rtburchak</button>
+      <button class="tool-btn" id="toolCircle" onclick="setTool('circle',this)"><span>⭕</span> Doira</button>
+      <button class="tool-btn" id="toolEraser" onclick="setTool('eraser',this)"><span>🧹</span> O'chirg'ich</button>
+
+      <h4 style="margin-top:14px;">🎨 Rang</h4>
+      <div class="color-row">
+        <div class="color-dot selected" style="background:#1a1f2e" onclick="setColor('#1a1f2e',this)"></div>
+        <div class="color-dot" style="background:#2e4a6b" onclick="setColor('#2e4a6b',this)"></div>
+        <div class="color-dot" style="background:#00bcd4" onclick="setColor('#00bcd4',this)"></div>
+        <div class="color-dot" style="background:#e74c3c" onclick="setColor('#e74c3c',this)"></div>
+        <div class="color-dot" style="background:#2ecc71" onclick="setColor('#2ecc71',this)"></div>
+        <div class="color-dot" style="background:#f5a623" onclick="setColor('#f5a623',this)"></div>
+        <div class="color-dot" style="background:#9b59b6" onclick="setColor('#9b59b6',this)"></div>
+        <div class="color-dot" style="background:#e67e22" onclick="setColor('#e67e22',this)"></div>
+      </div>
+
+      <label class="ctrl">Qalinlik: <strong id="thickVal">2</strong> px</label>
+      <input type="range" min="1" max="16" value="2" oninput="setThick(this)">
+
+      <label class="ctrl">Shaffoflik: <strong id="alphaVal">100</strong>%</label>
+      <input type="range" min="10" max="100" value="100" oninput="setAlpha(this)">
+
+      <h4 style="margin-top:14px;">📏 Chiziq turi</h4>
+      <select id="lineStyle" onchange="setLineStyle(this.value)"
+        style="width:100%;padding:7px;border:1px solid var(--grid);border-radius:4px;font-family:inherit;font-size:.85rem;">
+        <option value="solid">Qo'yiq (asosiy)</option>
+        <option value="dashed">Shtrix (ko'rinmas)</option>
+        <option value="dotted">Nuqtali (o'q)</option>
+      </select>
+
+      <div style="margin-top:16px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;">
+          <input type="checkbox" id="gridToggle" checked onchange="toggleGrid()"> Katak ko'rsatish
+        </label>
+      </div>
+    </div>
+
+    <!-- Canvas area -->
+    <div>
+      <canvas id="drawCanvas" width="700" height="480"></canvas>
+      <div class="canvas-actions">
+        <button class="btn btn-primary" onclick="clearCanvas()">🗑 Tozalash</button>
+        <button class="btn btn-amber" onclick="downloadCanvas()">⬇ Yuklab olish</button>
+        <button class="btn btn-outline" onclick="undoCanvas()">↩ Bekor</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mini legend -->
+  <div class="card" style="margin-top:20px;">
+    <h3>Chiziq turlari ko'rinmasi</h3>
+    <svg viewBox="0 0 600 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px">
+      <line x1="10" y1="15" x2="160" y2="15" stroke="#1a1f2e" stroke-width="3"/>
+      <text x="170" y="19" font-size="12" fill="#3a4560">Asosiy qo'yiq (ko'rinadigan kontur)</text>
+      <line x1="10" y1="38" x2="160" y2="38" stroke="#1a1f2e" stroke-width="1.2" stroke-dasharray="8,4"/>
+      <text x="170" y="42" font-size="12" fill="#3a4560">Shtrix (ko'rinmas kontur)</text>
+      <line x1="10" y1="61" x2="160" y2="61" stroke="#1a1f2e" stroke-width="1.2" stroke-dasharray="14,4,2,4"/>
+      <text x="170" y="65" font-size="12" fill="#3a4560">Shtrix-nuqtali (o'q chizig'i)</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ══════════════════ PROYEKSIYALAR ══════════════════ -->
+<div id="tab-proyeksiya" class="tab-panel">
+  <h2 class="section-title">Proyeksiya turlari va ko'rinishlar</h2>
+
+  <div class="views-grid">
+    <!-- Monge epyur -->
+    <div class="view-box" style="grid-column: span 2">
+      <h4>📐 Monge Epyuri — L-shakl detali</h4>
+      <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:#fff;border:1px solid #dce5ef;border-radius:4px">
+        <!-- Grid helper lines -->
+        <defs>
+          <pattern id="smallGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#eef2fa" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="700" height="320" fill="url(#smallGrid)"/>
+
+        <!-- Axes -->
+        <line x1="350" y1="10" x2="350" y2="310" stroke="#aaa" stroke-width="1" stroke-dasharray="4,3"/>
+        <line x1="10" y1="160" x2="690" y2="160" stroke="#aaa" stroke-width="1" stroke-dasharray="4,3"/>
+
+        <!-- Labels -->
+        <text x="354" y="18" font-size="12" fill="#999" font-family="monospace">Z</text>
+        <text x="680" y="158" font-size="12" fill="#999" font-family="monospace">X</text>
+        <text x="352" y="158" font-size="10" fill="#bbb">O</text>
+
+        <!-- FRONT VIEW (V) — top-left quadrant -->
+        <g transform="translate(120,60)">
+          <rect x="0" y="0" width="100" height="80" fill="none" stroke="#2e4a6b" stroke-width="2.5"/>
+          <rect x="0" y="50" width="60" height="30" fill="none" stroke="#2e4a6b" stroke-width="2.5"/>
+          <line x1="60" y1="50" x2="60" y2="80" stroke="#2e4a6b" stroke-width="1"/>
+          <text x="30" y="-8" font-size="11" fill="#2e4a6b" font-family="Oswald,sans-serif" font-weight="600">FRONTAL (V)</text>
+          <text x="30" y="-0" font-size="9" fill="#888">Olddan ko'rinish</text>
+        </g>
+
+        <!-- TOP VIEW (H) — bottom-left quadrant -->
+        <g transform="translate(120,190)">
+          <rect x="0" y="0" width="100" height="60" fill="none" stroke="#2e4a6b" stroke-width="2.5"/>
+          <rect x="0" y="0" width="60" height="25" fill="none" stroke="#2e4a6b" stroke-width="1.2" stroke-dasharray="6,3"/>
+          <text x="30" y="-5" font-size="11" fill="#2e4a6b" font-family="Oswald,sans-serif" font-weight="600">GORIZONTAL (H)</text>
+          <text x="18" y="75" font-size="9" fill="#888">Yuqoridan ko'rinish</text>
+        </g>
+
+        <!-- SIDE VIEW (W) — top-right quadrant -->
+        <g transform="translate(420,60)">
+          <rect x="0" y="0" width="60" height="80" fill="none" stroke="#2e4a6b" stroke-width="2.5"/>
+          <rect x="0" y="50" width="60" height="30" fill="none" stroke="#2e4a6b" stroke-width="1.2" stroke-dasharray="6,3"/>
+          <rect x="0" y="0" width="20" height="50" fill="#eef2fa" stroke="#2e4a6b" stroke-width="2.5"/>
+          <text x="-10" y="-8" font-size="11" fill="#2e4a6b" font-family="Oswald,sans-serif" font-weight="600">PROFIL (W)</text>
+          <text x="-2" y="-0" font-size="9" fill="#888">O'ngdan ko'rinish</text>
+        </g>
+
+        <!-- Projection lines (dashed) -->
+        <line x1="220" y1="140" x2="220" y2="190" stroke="#00bcd4" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="240" y1="140" x2="240" y2="190" stroke="#00bcd4" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="320" y1="100" x2="420" y2="100" stroke="#00bcd4" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="320" y1="140" x2="420" y2="140" stroke="#00bcd4" stroke-width="1" stroke-dasharray="3,3"/>
+
+        <!-- Legend -->
+        <rect x="540" y="270" width="150" height="42" fill="white" stroke="#dce5ef" rx="3"/>
+        <line x1="548" y1="282" x2="568" y2="282" stroke="#2e4a6b" stroke-width="2"/>
+        <text x="572" y="285" font-size="10" fill="#444">Ko'rinadigan</text>
+        <line x1="548" y1="298" x2="568" y2="298" stroke="#2e4a6b" stroke-width="1.2" stroke-dasharray="5,3"/>
+        <text x="572" y="301" font-size="10" fill="#444">Ko'rinmas</text>
+        <line x1="548" y1="314" x2="568" y2="314" stroke="#00bcd4" stroke-width="1" stroke-dasharray="2,2"/>
+        <text x="572" y="317" font-size="10" fill="#444">Proyeksiya chizig'i</text>
+      </svg>
+    </div>
+
+    <!-- Isometric -->
+    <div class="view-box">
+      <h4>🔷 Izometrik Proyeksiya</h4>
+      <svg viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:#fff;border:1px solid #dce5ef;border-radius:4px">
+        <!-- Isometric box -->
+        <g transform="translate(140,180)">
+          <!-- Bottom face -->
+          <polygon points="0,-30 52,-56 104,-30 52,-4" fill="#d6eaf8" stroke="#2e4a6b" stroke-width="2"/>
+          <!-- Left face -->
+          <polygon points="0,-30 0,-110 52,-84 52,-4" fill="#aed6f1" stroke="#2e4a6b" stroke-width="2"/>
+          <!-- Right face -->
+          <polygon points="104,-30 104,-110 52,-84 52,-4" fill="#85c1e9" stroke="#2e4a6b" stroke-width="2"/>
+          <!-- Top face -->
+          <polygon points="0,-110 52,-136 104,-110 52,-84" fill="#ebf5fb" stroke="#2e4a6b" stroke-width="2"/>
+          <!-- Notch left -->
+          <polygon points="0,-110 0,-60 26,-73 26,-123" fill="#d4e6f1" stroke="#2e4a6b" stroke-width="1.5"/>
+          <!-- Notch top -->
+          <polygon points="0,-110 26,-123 78,-97 52,-84" fill="#f0f8ff" stroke="#2e4a6b" stroke-width="1.5"/>
+        </g>
+        <!-- Axes -->
+        <line x1="140" y1="180" x2="80" y2="210" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="4,2"/>
+        <line x1="140" y1="180" x2="200" y2="210" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4,2"/>
+        <line x1="140" y1="180" x2="140" y2="140" stroke="#3498db" stroke-width="1.5" stroke-dasharray="4,2"/>
+        <text x="68" y="218" font-size="11" fill="#e74c3c" font-weight="bold">X</text>
+        <text x="202" y="218" font-size="11" fill="#2ecc71" font-weight="bold">Y</text>
+        <text x="143" y="132" font-size="11" fill="#3498db" font-weight="bold">Z</text>
+        <text x="90" y="15" font-size="11" fill="#2e4a6b" font-family="Oswald,sans-serif">Izometriya — 120°/120°/120°</text>
+      </svg>
+    </div>
+
+    <!-- Dimetric -->
+    <div class="view-box">
+      <h4>🔶 Dimetrik Proyeksiya</h4>
+      <svg viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:#fff;border:1px solid #dce5ef;border-radius:4px">
+        <g transform="translate(100,190)">
+          <!-- Dimetric (Y axis is shortened 0.5) -->
+          <polygon points="0,0 80,-40 130,-15 50,25" fill="#fdebd0" stroke="#e67e22" stroke-width="2"/>
+          <polygon points="0,0 0,-80 50,-55 50,25" fill="#fad7a0" stroke="#e67e22" stroke-width="2"/>
+          <polygon points="130,-15 130,-95 50,-135 50,-55" fill="#f5cba7" stroke="#e67e22" stroke-width="2"/>
+          <polygon points="0,-80 80,-120 130,-95 50,-135" fill="#fef9e7" stroke="#e67e22" stroke-width="2"/>
+        </g>
+        <!-- Y axis label note -->
+        <text x="50" y="14" font-size="11" fill="#e67e22" font-family="Oswald,sans-serif">Dimetriya — Y o'qi × 0.5</text>
+        <text x="50" y="26" font-size="9" fill="#888">X=7°, Y=41° (gorizontga nisbatan)</text>
+      </svg>
+    </div>
+
+    <!-- Cross section -->
+    <div class="view-box">
+      <h4>✂️ To'liq qirqim (detail)</h4>
+      <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:#fff;border:1px solid #dce5ef;border-radius:4px">
+        <!-- Outer shape -->
+        <rect x="60" y="30" width="160" height="140" fill="none" stroke="#2e4a6b" stroke-width="2"/>
+        <!-- Inner bore -->
+        <rect x="100" y="60" width="80" height="80" fill="none" stroke="#2e4a6b" stroke-width="2"/>
+        <!-- Left half — hatching -->
+        <g clip-path="url(#leftHalf)">
+          <rect x="60" y="30" width="80" height="140" fill="none"/>
+          <line x1="60" y1="30" x2="140" y2="110" stroke="#2e4a6b" stroke-width="0.8"/>
+          <line x1="60" y1="50" x2="140" y2="130" stroke="#2e4a6b" stroke-width="0.8"/>
+          <line x1="60" y1="70" x2="140" y2="150" stroke="#2e4a6b" stroke-width="0.8"/>
+          <line x1="60" y1="90" x2="120" y2="150" stroke="#2e4a6b" stroke-width="0.8"/>
+          <line x1="60" y1="110" x2="100" y2="150" stroke="#2e4a6b" stroke-width="0.8"/>
+          <line x1="60" y1="130" x2="80" y2="150" stroke="#2e4a6b" stroke-width="0.8"/>
+          <line x1="80" y1="30" x2="140" y2="90" stroke="#2e4a6b" stroke-width="0.8"/>
+          <line x1="100" y1="30" x2="140" y2="70" stroke="#2e4a6b" stroke-width="0.8"/>
+          <line x1="120" y1="30" x2="140" y2="50" stroke="#2e4a6b" stroke-width="0.8"/>
+        </g>
+        <!-- Right half — hatching (outer ring) -->
+        <line x1="180" y1="30" x2="220" y2="70" stroke="#2e4a6b" stroke-width="0.8"/>
+        <line x1="160" y1="30" x2="220" y2="90" stroke="#2e4a6b" stroke-width="0.8"/>
+        <line x1="140" y1="30" x2="220" y2="110" stroke="#2e4a6b" stroke-width="0.8"/>
+        <line x1="180" y1="140" x2="220" y2="100" stroke="#2e4a6b" stroke-width="0.8"/>
+        <line x1="180" y1="160" x2="220" y2="120" stroke="#2e4a6b" stroke-width="0.8"/>
+        <line x1="180" y1="170" x2="220" y2="130" stroke="#2e4a6b" stroke-width="0.8"/>
+        <line x1="180" y1="170" x2="200" y2="150" stroke="#2e4a6b" stroke-width="0.8"/>
+        <!-- Cutting plane line -->
+        <line x1="140" y1="20" x2="140" y2="180" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="10,3,2,3"/>
+        <!-- Arrows -->
+        <polygon points="140,22 136,34 144,34" fill="#e74c3c"/>
+        <polygon points="140,178 136,166 144,166" fill="#e74c3c"/>
+        <!-- Label -->
+        <text x="128" y="15" font-size="11" fill="#e74c3c" font-weight="bold">A</text>
+        <text x="128" y="196" font-size="11" fill="#e74c3c" font-weight="bold">A</text>
+        <text x="8" y="105" font-size="9" fill="#888" transform="rotate(-90,8,105)">Qirqim A-A</text>
+      </svg>
+    </div>
+
+    <!-- Thread drawing -->
+    <div class="view-box">
+      <h4>🔩 Rezba tasvirlanishi (M20)</h4>
+      <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:#fff;border:1px solid #dce5ef;border-radius:4px">
+        <!-- Bolt shaft -->
+        <rect x="60" y="80" width="160" height="40" fill="#d6eaf8" stroke="#2e4a6b" stroke-width="2.5"/>
+        <!-- Thread lines (outer) -->
+        <line x1="60" y1="80" x2="220" y2="80" stroke="#2e4a6b" stroke-width="2.5"/>
+        <line x1="60" y1="120" x2="220" y2="120" stroke="#2e4a6b" stroke-width="2.5"/>
+        <!-- Thread inner (dashed) -->
+        <line x1="60" y1="86" x2="200" y2="86" stroke="#2e4a6b" stroke-width="1" stroke-dasharray="5,3"/>
+        <line x1="60" y1="114" x2="200" y2="114" stroke="#2e4a6b" stroke-width="1" stroke-dasharray="5,3"/>
+        <!-- End of thread -->
+        <line x1="200" y1="80" x2="200" y2="120" stroke="#2e4a6b" stroke-width="1.5"/>
+        <!-- Chamfer -->
+        <line x1="60" y1="80" x2="70" y2="74" stroke="#2e4a6b" stroke-width="2.5"/>
+        <line x1="60" y1="120" x2="70" y2="126" stroke="#2e4a6b" stroke-width="2.5"/>
+        <!-- Dimension -->
+        <line x1="60" y1="140" x2="220" y2="140" stroke="#888" stroke-width="0.8"/>
+        <line x1="60" y1="136" x2="60" y2="144" stroke="#888" stroke-width="0.8"/>
+        <line x1="220" y1="136" x2="220" y2="144" stroke="#888" stroke-width="0.8"/>
+        <text x="115" y="154" font-size="11" fill="#333">L = uzunlik</text>
+        <!-- Diameter dim -->
+        <line x1="30" y1="80" x2="30" y2="120" stroke="#888" stroke-width="0.8"/>
+        <line x1="26" y1="80" x2="34" y2="80" stroke="#888" stroke-width="0.8"/>
+        <line x1="26" y1="120" x2="34" y2="120" stroke="#888" stroke-width="0.8"/>
+        <text x="4" y="105" font-size="11" fill="#333">Ø20</text>
+        <!-- Label -->
+        <text x="85" y="30" font-size="12" fill="#2e4a6b" font-family="Oswald,sans-serif">Tashqi rezba M20×2.5</text>
+        <text x="72" y="44" font-size="9" fill="#666">GOST 9150-2002 · profil burchagi 60°</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ TOPSHIRIQLAR ══════════════════ -->
+<div id="tab-topshiriqlar" class="tab-panel">
+  <h2 class="section-title">Interaktiv Topshiriqlar</h2>
+  <div id="score-display" style="font-family:'Oswald',sans-serif;font-size:.95rem;color:var(--steel);margin-bottom:14px;">
+    Natija: <strong id="scoreText">0 / 0</strong>
+  </div>
+
+  <!-- TASK 1 -->
+  <div class="task-card">
+    <div class="task-header">
+      <h3>1-Topshiriq: Chiziq turini aniqlang</h3>
+      <span class="diff easy">Oson</span>
+    </div>
+    <div class="task-body">
+      <p>Quyidagi chiziq qanday nomlanadi va qaysi maqsadda ishlatiladi?</p>
+      <div class="task-svg-wrap">
+        <svg viewBox="0 0 400 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:360px">
+          <line x1="20" y1="30" x2="380" y2="30" stroke="#1a1f2e" stroke-width="2" stroke-dasharray="18,5,2,5"/>
+          <circle cx="20" cy="30" r="3" fill="#2e4a6b"/>
+          <circle cx="380" cy="30" r="3" fill="#2e4a6b"/>
+        </svg>
+      </div>
+      <div class="task-options">
+        <button class="opt-btn" onclick="checkAnswer(this,'t1',false)">A) Asosiy qo'yiq chiziq — ko'rinadigan kontur</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t1',false)">B) Shtrix chiziq — ko'rinmas kontur</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t1',true)">C) Shtrix-nuqtali chiziq — o'q chiziqlari</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t1',false)">D) To'lqinli chiziq — uzilish chiziqlari</button>
+      </div>
+      <div class="feedback" id="fb-t1"></div>
+    </div>
+  </div>
+
+  <!-- TASK 2 -->
+  <div class="task-card">
+    <div class="task-header">
+      <h3>2-Topshiriq: Proyeksiya tekisliklari</h3>
+      <span class="diff easy">Oson</span>
+    </div>
+    <div class="task-body">
+      <p>Monge metodida qancha asosiy proyeksiya tekisligi ishlatiladi va ular qanday nomlanadi?</p>
+      <div class="task-options">
+        <button class="opt-btn" onclick="checkAnswer(this,'t2',false)">A) 2 ta: Frontal va Gorizontal</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t2',true)">B) 3 ta: Frontal (V), Gorizontal (H), Profil (W)</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t2',false)">C) 4 ta: 3 asosiy + 1 yordamchi</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t2',false)">D) 6 ta: har bir tomondan bittadan</button>
+      </div>
+      <div class="feedback" id="fb-t2"></div>
+    </div>
+  </div>
+
+  <!-- TASK 3 -->
+  <div class="task-card">
+    <div class="task-header">
+      <h3>3-Topshiriq: Ko'rishni aniqlang</h3>
+      <span class="diff medium">O'rta</span>
+    </div>
+    <div class="task-body">
+      <p>Quyidagi frontal proyeksiya (olddan ko'rinish) berilgan. Bu shaklning yuqoridan ko'rinishi qanday bo'ladi?</p>
+      <div class="task-svg-wrap">
+        <svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:360px">
+          <!-- Front view -->
+          <text x="10" y="15" font-size="11" fill="#2e4a6b" font-family="Oswald,sans-serif">Frontal ko'rinish:</text>
+          <rect x="10" y="25" width="120" height="80" fill="none" stroke="#2e4a6b" stroke-width="2.5"/>
+          <rect x="10" y="80" width="60" height="25" fill="none" stroke="#2e4a6b" stroke-width="2.5"/>
+          <!-- Options as small SVG shapes -->
+          <text x="160" y="15" font-size="11" fill="#2e4a6b" font-family="Oswald,sans-serif">Yuqoridan ko'rinish qaysi?</text>
+          <!-- A -->
+          <text x="155" y="40" font-size="10" fill="#666">A)</text>
+          <rect x="170" y="28" width="80" height="60" fill="none" stroke="#2e4a6b" stroke-width="1.8"/>
+          <!-- B (correct: L-shape from top) -->
+          <text x="265" y="40" font-size="10" fill="#666">B) ✓</text>
+          <rect x="280" y="28" width="80" height="60" fill="none" stroke="#2e4a6b" stroke-width="1.8"/>
+          <rect x="280" y="28" width="45" height="30" fill="none" stroke="#2e4a6b" stroke-width="1.8"/>
+          <!-- C -->
+          <text x="155" y="115" font-size="10" fill="#666">C)</text>
+          <circle cx="210" cy="135" r="28" fill="none" stroke="#2e4a6b" stroke-width="1.8"/>
+          <!-- D -->
+          <text x="265" y="115" font-size="10" fill="#666">D)</text>
+          <rect x="280" y="115" width="80" height="40" fill="none" stroke="#2e4a6b" stroke-width="1.8"/>
+          <line x1="280" y1="135" x2="360" y2="135" stroke="#2e4a6b" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <div class="task-options">
+        <button class="opt-btn" onclick="checkAnswer(this,'t3',false)">A) To'rtburchak (80×60)</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t3',true)">B) L-shakl (ikkita to'rtburchak)</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t3',false)">C) Doira</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t3',false)">D) Chiziq bilan bo'lingan to'rtburchak</button>
+      </div>
+      <div class="feedback" id="fb-t3"></div>
+    </div>
+  </div>
+
+  <!-- TASK 4 -->
+  <div class="task-card">
+    <div class="task-header">
+      <h3>4-Topshiriq: Shtrixlash qoidasi</h3>
+      <span class="diff medium">O'rta</span>
+    </div>
+    <div class="task-body">
+      <p>Metallarning qirqimida shtrixlash qanday amalga oshiriladi?</p>
+      <div class="task-svg-wrap">
+        <svg viewBox="0 0 400 90" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:380px">
+          <!-- 4 options -->
+          <g>
+            <rect x="10" y="10" width="80" height="70" fill="none" stroke="#2e4a6b" stroke-width="1.5"/>
+            <clipPath id="c1"><rect x="10" y="10" width="80" height="70"/></clipPath>
+            <g clip-path="url(#c1)">
+              <line x1="10" y1="10" x2="90" y2="90" stroke="#2e4a6b" stroke-width="0.9"/>
+              <line x1="10" y1="25" x2="75" y2="90" stroke="#2e4a6b" stroke-width="0.9"/>
+              <line x1="10" y1="40" x2="60" y2="90" stroke="#2e4a6b" stroke-width="0.9"/>
+              <line x1="10" y1="55" x2="45" y2="90" stroke="#2e4a6b" stroke-width="0.9"/>
+              <line x1="25" y1="10" x2="90" y2="75" stroke="#2e4a6b" stroke-width="0.9"/>
+              <line x1="40" y1="10" x2="90" y2="60" stroke="#2e4a6b" stroke-width="0.9"/>
+              <line x1="55" y1="10" x2="90" y2="45" stroke="#2e4a6b" stroke-width="0.9"/>
+              <line x1="70" y1="10" x2="90" y2="30" stroke="#2e4a6b" stroke-width="0.9"/>
+            </g>
+            <text x="22" y="82" font-size="9" fill="#e74c3c">A) 90°</text>
+          </g>
+          <g transform="translate(110,0)">
+            <rect x="10" y="10" width="80" height="70" fill="none" stroke="#2e4a6b" stroke-width="1.5"/>
+            <clipPath id="c2"><rect x="10" y="10" width="80" height="70" transform="translate(110,0)"/></clipPath>
+            <!-- 45° correct hatch -->
+            <line x1="120" y1="10" x2="200" y2="90" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="120" y1="25" x2="185" y2="90" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="120" y1="40" x2="170" y2="90" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="120" y1="55" x2="155" y2="90" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="135" y1="10" x2="200" y2="75" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="150" y1="10" x2="200" y2="60" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="165" y1="10" x2="200" y2="45" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="180" y1="10" x2="200" y2="30" stroke="#2e4a6b" stroke-width="0.9"/>
+            <text x="132" y="82" font-size="9" fill="#2ecc71">B) 45° ✓</text>
+          </g>
+          <g transform="translate(220,0)">
+            <rect x="10" y="10" width="80" height="70" fill="none" stroke="#2e4a6b" stroke-width="1.5"/>
+            <line x1="230" y1="20" x2="300" y2="20" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="230" y1="32" x2="300" y2="32" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="230" y1="44" x2="300" y2="44" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="230" y1="56" x2="300" y2="56" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="230" y1="68" x2="300" y2="68" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="230" y1="80" x2="300" y2="80" stroke="#2e4a6b" stroke-width="0.9"/>
+            <text x="242" y="82" font-size="9" fill="#e74c3c">C) 0°</text>
+          </g>
+          <g transform="translate(330,0)">
+            <rect x="10" y="10" width="55" height="70" fill="none" stroke="#2e4a6b" stroke-width="1.5"/>
+            <line x1="340" y1="20" x2="395" y2="55" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="340" y1="35" x2="395" y2="70" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="340" y1="48" x2="388" y2="80" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="340" y1="62" x2="378" y2="80" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="352" y1="10" x2="395" y2="38" stroke="#2e4a6b" stroke-width="0.9"/>
+            <line x1="366" y1="10" x2="395" y2="28" stroke="#2e4a6b" stroke-width="0.9"/>
+            <text x="340" y="85" font-size="9" fill="#e74c3c">D) 30°</text>
+          </g>
+        </svg>
+      </div>
+      <div class="task-options">
+        <button class="opt-btn" onclick="checkAnswer(this,'t4',false)">A) Gorizontal (0°) — parallel chizilar</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t4',true)">B) 45° burchak ostida parallel chizilar</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t4',false)">C) Vertikal (90°) — tik chizilar</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t4',false)">D) 30° burchak ostida chizilar</button>
+      </div>
+      <div class="feedback" id="fb-t4"></div>
+    </div>
+  </div>
+
+  <!-- TASK 5 -->
+  <div class="task-card">
+    <div class="task-header">
+      <h3>5-Topshiriq: Masshtab</h3>
+      <span class="diff medium">O'rta</span>
+    </div>
+    <div class="task-body">
+      <p>Haqiqiy o'lcham 150 mm bo'lgan detalning 1:5 masshtabdagi chizmadagi o'lchami qancha bo'ladi?</p>
+      <div class="task-options">
+        <button class="opt-btn" onclick="checkAnswer(this,'t5',false)">A) 750 mm</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t5',false)">B) 150 mm</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t5',true)">C) 30 mm</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t5',false)">D) 15 mm</button>
+      </div>
+      <div class="feedback" id="fb-t5"></div>
+    </div>
+  </div>
+
+  <!-- TASK 6 -->
+  <div class="task-card">
+    <div class="task-header">
+      <h3>6-Topshiriq: Izometrik burchak</h3>
+      <span class="diff hard">Murakkab</span>
+    </div>
+    <div class="task-body">
+      <p>Standart izometrik proyeksiyada X, Y va Z o'qlarining bir-biridan burchak farqi qancha?</p>
+      <div class="task-options">
+        <button class="opt-btn" onclick="checkAnswer(this,'t6',false)">A) 90° — uchala o'q perpendikulyar</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t6',true)">B) 120° — uchala o'q teng taqsimlangan</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t6',false)">C) 60° — o'tkir burchak ostida</button>
+        <button class="opt-btn" onclick="checkAnswer(this,'t6',false)">D) 45° va 90° — ikki xil burchak</button>
+      </div>
+      <div class="feedback" id="fb-t6"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ FORMULALAR ══════════════════ -->
+<div id="tab-formulalar" class="tab-panel">
+  <h2 class="section-title">Asosiy Formulalar va Standartlar</h2>
+
+  <div class="card">
+    <h3>📐 Masshtab formulasi</h3>
+    <table class="formula-table">
+      <tr><th>Formula</th><th>Izohlash</th><th>Misol</th></tr>
+      <tr><td><code>M = l_ch / l_haq</code></td><td>Chizmadagi o'lcham / Haqiqiy o'lcham</td><td>30/150 = 1:5</td></tr>
+      <tr><td><code>l_ch = l_haq × M</code></td><td>Kattalashtirish masshtabi</td><td>50 × 2 = 100 mm (2:1)</td></tr>
+      <tr><td><code>l_haq = l_ch / M</code></td><td>Haqiqiy o'lchamni hisoblash</td><td>30 / 0.2 = 150 mm</td></tr>
+    </table>
+    <p style="margin-top:10px;font-size:.85rem;color:#666;">
+      Standart masshtablar (GOST 2.302-68): Kichraytirish: 1:2 · 1:2.5 · 1:4 · 1:5 · 1:10 · 1:20 · 1:50 · 1:100<br>
+      Kattalаshtirish: 2:1 · 2.5:1 · 4:1 · 5:1 · 10:1 · 20:1 · 50:1
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>📏 Chiziq qalinligi (GOST 2.303-68)</h3>
+    <table class="formula-table">
+      <tr><th>Chiziq turi</th><th>Qalinlik</th><th>Ishlatilishi</th></tr>
+      <tr><td>Asosiy qo'yiq</td><td><code>S = 0.5...1.4 mm</code></td><td>Ko'rinadigan konturlar</td></tr>
+      <tr><td>Ingichka</td><td><code>S/3...S/2</code></td><td>O'lcham, shtrix, ko'rsatma</td></tr>
+      <tr><td>Shtrix</td><td><code>S/2</code></td><td>Ko'rinmas konturlar</td></tr>
+      <tr><td>Shtrix-nuqtali</td><td><code>S/2</code></td><td>O'q, simmetriya chiziqlari</td></tr>
+      <tr><td>To'lqinli</td><td><code>S/2</code></td><td>Uzilish, qirqim chegarasi</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>📦 Aksonometrik proyeksiya koeffitsientlari</h3>
+    <table class="formula-table">
+      <tr><th>Tur</th><th>X (a)</th><th>Y (b)</th><th>Z (c)</th><th>Burchak</th></tr>
+      <tr><td>Izometriya</td><td><code>0.82≈1</code></td><td><code>0.82≈1</code></td><td><code>0.82≈1</code></td><td>120° / 120° / 120°</td></tr>
+      <tr><td>Dimetriya</td><td><code>0.94≈1</code></td><td><code>0.47≈0.5</code></td><td><code>0.94≈1</code></td><td>7° / 41°</td></tr>
+      <tr><td>Kabinet</td><td><code>1</code></td><td><code>0.5</code></td><td><code>1</code></td><td>45°</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>🔩 Rezba parametrlari</h3>
+    <table class="formula-table">
+      <tr><th>Belgi</th><th>Izoh</th><th>Misol</th></tr>
+      <tr><td><code>d</code></td><td>Tashqi (nominal) diametr</td><td>M20 → d = 20 mm</td></tr>
+      <tr><td><code>d₁</code></td><td>Ichki diametr</td><td>d₁ = d − 1.227P</td></tr>
+      <tr><td><code>d₂</code></td><td>O'rta diametr</td><td>d₂ = d − 0.649P</td></tr>
+      <tr><td><code>P</code></td><td>Qadам (pitch)</td><td>M20 → P = 2.5 mm</td></tr>
+      <tr><td><code>α</code></td><td>Profil burchagi</td><td>Metrik: 60°</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>📄 Chizma varaqalar formati (GOST 2.301-68)</h3>
+    <table class="formula-table">
+      <tr><th>Format</th><th>O'lcham (mm)</th><th>Maydon (m²)</th></tr>
+      <tr><td>A0</td><td><code>1189 × 841</code></td><td>≈ 1.0</td></tr>
+      <tr><td>A1</td><td><code>841 × 594</code></td><td>≈ 0.5</td></tr>
+      <tr><td>A2</td><td><code>594 × 420</code></td><td>≈ 0.25</td></tr>
+      <tr><td>A3</td><td><code>420 × 297</code></td><td>≈ 0.125</td></tr>
+      <tr><td>A4</td><td><code>297 × 210</code></td><td>≈ 0.0625</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════ LUG'AT ══════════════════ -->
+<div id="tab-lug'at" class="tab-panel">
+  <h2 class="section-title">Muhandislik Grafikasi Lugʻati</h2>
+  <div class="glossary-search">
+    <input type="text" id="glossSearch" placeholder="Atama qidirish..." oninput="filterGloss(this.value)">
+  </div>
+  <dl id="glossList"></dl>
+</div>
+
+<!-- ══════════════════ PROGRESS ══════════════════ -->
+<div id="tab-progress" class="tab-panel">
+  <h2 class="section-title">O'quv Natijalari</h2>
+
+  <div class="score-row">
+    <div class="score-box">
+      <div class="num" id="pTotal">0</div>
+      <p>Jami topshiriqlar</p>
+    </div>
+    <div class="score-box">
+      <div class="num" id="pCorrect" style="color:var(--ok)">0</div>
+      <p>To'g'ri javoblar</p>
+    </div>
+    <div class="score-box">
+      <div class="num" id="pPct" style="color:var(--amber)">0%</div>
+      <p>Foiz natija</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Umumiy progress</h3>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="mainBar" style="width:0%"></div>
+    </div>
+    <p style="margin-top:6px;font-size:.85rem;color:#666;" id="progLabel">Topshiriqlarni bajaring va natijalarni kuzating.</p>
+  </div>
+
+  <div class="card">
+    <h3>Topshiriqlar jadvali</h3>
+    <table class="formula-table" id="progressTable">
+      <tr>
+        <th>#</th><th>Topshiriq</th><th>Daraja</th><th>Natija</th>
+      </tr>
+      <tr><td>1</td><td>Chiziq turini aniqlash</td><td><span class="diff easy">Oson</span></td><td id="pr1">—</td></tr>
+      <tr><td>2</td><td>Proyeksiya tekisliklari</td><td><span class="diff easy">Oson</span></td><td id="pr2">—</td></tr>
+      <tr><td>3</td><td>Ko'rishni aniqlash</td><td><span class="diff medium">O'rta</span></td><td id="pr3">—</td></tr>
+      <tr><td>4</td><td>Shtrixlash qoidasi</td><td><span class="diff medium">O'rta</span></td><td id="pr4">—</td></tr>
+      <tr><td>5</td><td>Masshtab hisoblash</td><td><span class="diff medium">O'rta</span></td><td id="pr5">—</td></tr>
+      <tr><td>6</td><td>Izometrik burchak</td><td><span class="diff hard">Murakkab</span></td><td id="pr6">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Baholash mezonlari</h3>
+    <ul>
+      <li><strong>90–100%</strong> — "A'lo" (5) — mukammal bilim</li>
+      <li><strong>75–89%</strong> — "Yaxshi" (4) — yaxshi o'zlashtirish</li>
+      <li><strong>60–74%</strong> — "Qoniqarli" (3) — o'rtacha bilim</li>
+      <li><strong>0–59%</strong> — "Qoniqarsiz" (2) — qayta o'rganish tavsiya etiladi</li>
+    </ul>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  Boymuratov Farrux Xamzayevich · «Muhandislik va Kompyuter Grafikasi» Interaktiv o'quv tizimi<br>
+  Kognitiv qiziqishlarni rivojlantirish metodikasi · Texnika yo'nalishlari talabalari uchun
+</footer>
+
+<script>
+/* ══════════════════════════════
+   TAB NAVIGATION
+══════════════════════════════ */
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+/* ══════════════════════════════
+   CANVAS DRAWING
+══════════════════════════════ */
+const canvas = document.getElementById('drawCanvas');
+const ctx = canvas.getContext('2d');
+let isDrawing = false;
+let tool = 'pen';
+let drawColor = '#1a1f2e';
+let lineWidth = 2;
+let alpha = 1;
+let lineDash = [];
+let startX, startY;
+let history = [];
+let showGrid = true;
+
+function saveState() {
+  history.push(canvas.toDataURL());
+  if (history.length > 30) history.shift();
+}
+
+function drawGridLines() {
+  ctx.save();
+  ctx.strokeStyle = '#e8eef6';
+  ctx.lineWidth = 0.5;
+  ctx.setLineDash([]);
+  const w = canvas.width, h = canvas.height;
+  const step = 20;
+  for (let x = 0; x <= w; x += step) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+  }
+  for (let y = 0; y <= h; y += step) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function redrawCanvas(img) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (showGrid) drawGridLines();
+  if (img) {
+    const i = new Image(); i.src = img;
+    i.onload = () => ctx.drawImage(i, 0, 0);
+  }
+}
+
+function getPos(e) {
+  const r = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / r.width;
+  const scaleY = canvas.height / r.height;
+  if (e.touches) {
+    return { x: (e.touches[0].clientX - r.left) * scaleX, y: (e.touches[0].clientY - r.top) * scaleY };
+  }
+  return { x: (e.clientX - r.left) * scaleX, y: (e.clientY - r.top) * scaleY };
+}
+
+function startDraw(e) {
+  e.preventDefault();
+  saveState();
+  isDrawing = true;
+  const p = getPos(e);
+  startX = p.x; startY = p.y;
+  if (tool === 'pen' || tool === 'eraser') {
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+  }
+}
+
+function drawMove(e) {
+  if (!isDrawing) return;
+  e.preventDefault();
+  const p = getPos(e);
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = tool === 'eraser' ? '#ffffff' : drawColor;
+  ctx.lineWidth = tool === 'eraser' ? lineWidth * 4 : lineWidth;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.setLineDash(lineDash);
+
+  if (tool === 'pen' || tool === 'eraser') {
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+  } else {
+    // Redraw from saved state for shapes
+    redrawCanvas(history[history.length - 1]);
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = drawColor;
+    ctx.lineWidth = lineWidth;
+    ctx.setLineDash(lineDash);
+    ctx.beginPath();
+    if (tool === 'line') {
+      ctx.moveTo(startX, startY); ctx.lineTo(p.x, p.y);
+    } else if (tool === 'rect') {
+      ctx.rect(startX, startY, p.x - startX, p.y - startY);
+    } else if (tool === 'circle') {
+      const r = Math.sqrt(Math.pow(p.x - startX, 2) + Math.pow(p.y - startY, 2));
+      ctx.arc(startX, startY, r, 0, Math.PI * 2);
+    }
+    ctx.stroke();
+  }
+}
+
+function endDraw(e) {
+  isDrawing = false;
+  ctx.globalAlpha = 1;
+}
+
+canvas.addEventListener('mousedown', startDraw);
+canvas.addEventListener('mousemove', drawMove);
+canvas.addEventListener('mouseup', endDraw);
+canvas.addEventListener('touchstart', startDraw, {passive:false});
+canvas.addEventListener('touchmove', drawMove, {passive:false});
+canvas.addEventListener('touchend', endDraw);
+
+function setTool(t, el) {
+  tool = t;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+function setColor(c, el) {
+  drawColor = c;
+  document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function setThick(el) {
+  lineWidth = +el.value;
+  document.getElementById('thickVal').textContent = el.value;
+}
+function setAlpha(el) {
+  alpha = el.value / 100;
+  document.getElementById('alphaVal').textContent = el.value;
+}
+function setLineStyle(v) {
+  if (v === 'solid') lineDash = [];
+  else if (v === 'dashed') lineDash = [10, 5];
+  else lineDash = [14, 4, 2, 4];
+}
+function toggleGrid() {
+  showGrid = document.getElementById('gridToggle').checked;
+  const last = history[history.length - 1] || null;
+  redrawCanvas(last);
+}
+function clearCanvas() {
+  saveState();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (showGrid) drawGridLines();
+}
+function undoCanvas() {
+  if (history.length === 0) return;
+  const prev = history.pop();
+  redrawCanvas(prev);
+}
+function downloadCanvas() {
+  const link = document.createElement('a');
+  link.download = 'muhandislik_chizma.png';
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+// Init canvas
+if (showGrid) drawGridLines();
+
+/* ══════════════════════════════
+   QUIZ
+══════════════════════════════ */
+const answers = { t1: false, t2: false, t3: false, t4: false, t5: false, t6: false };
+const feedbacks = {
+  t1: { ok: "✅ To'g'ri! Shtrix-nuqtali chiziq o'q va simmetriya chiziqlari uchun ishlatiladi (GOST 2.303-68).", bad: "❌ Noto'g'ri. Bu shtrix-nuqtali chiziq — o'q va simmetriya chiziqlari uchun mo'ljallangan." },
+  t2: { ok: "✅ To'g'ri! Monge metodida 3 ta asosiy proyeksiya tekisligi: Frontal (V), Gorizontal (H) va Profil (W).", bad: "❌ Noto'g'ri. Monge metodida aynan 3 ta proyeksiya tekisligi ishlatiladi: V, H, W." },
+  t3: { ok: "✅ To'g'ri! L-shakl detalining yuqoridan ko'rinishi ham L-shaklni beradi, lekin boshqa o'lchamda.", bad: "❌ Noto'g'ri. L-shakl detalini yuqoridan qaralganda L-shaklni (ikkita to'rtburchak) ko'rasiz." },
+  t4: { ok: "✅ To'g'ri! GOST bo'yicha metall qirqimlarida shtrixlash 45° burchak ostida amalga oshiriladi.", bad: "❌ Noto'g'ri. Metallar uchun shtrixlash 45° burchak ostida, parallel chiziqlar bilan bajariladi." },
+  t5: { ok: "✅ To'g'ri! 1:5 masshtab — 150 ÷ 5 = 30 mm. Kichraytirish masshtabi o'lchamni kamaytiradi.", bad: "❌ Noto'g'ri. 1:5 kichraytirish masshtabida: 150 ÷ 5 = 30 mm bo'ladi." },
+  t6: { ok: "✅ To'g'ri! Izometrik proyeksiyada uchala o'q 360° ÷ 3 = 120° burchak bilan joylashadi.", bad: "❌ Noto'g'ri. Izometrik proyeksiyada X, Y, Z o'qlari 120° burchak bilan teng taqsimlanadi." },
+};
+
+function checkAnswer(btn, tid, isCorrect) {
+  const opts = btn.closest('.task-options').querySelectorAll('.opt-btn');
+  opts.forEach(b => b.disabled = true);
+
+  if (answers[tid] === undefined || answers[tid] === null) {
+    // first attempt
+  }
+  const alreadyDone = (answers[tid] === true || answers[tid] === false && document.getElementById('fb-' + tid).classList.contains('show'));
+  if (!alreadyDone || answers[tid] === null) {
+    // mark
+  }
+
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+
+  const fb = document.getElementById('fb-' + tid);
+  const info = feedbacks[tid];
+  fb.textContent = isCorrect ? info.ok : info.bad;
+  fb.className = 'feedback show ' + (isCorrect ? 'ok' : 'bad');
+
+  if (!answers[tid]) {
+    answers[tid] = isCorrect;
+    updateProgress();
+  }
+}
+
+function updateProgress() {
+  const keys = Object.keys(answers);
+  const done = keys.filter(k => answers[k] !== false || document.getElementById('fb-' + k).classList.contains('show'));
+  // Count answered
+  let total = 0, correct = 0;
+  const ids = ['t1','t2','t3','t4','t5','t6'];
+  ids.forEach((id, i) => {
+    const fb = document.getElementById('fb-' + id);
+    if (fb && fb.classList.contains('show')) {
+      total++;
+      if (fb.classList.contains('ok')) correct++;
+      const cell = document.getElementById('pr' + (i + 1));
+      if (cell) cell.textContent = fb.classList.contains('ok') ? '✅ To\'g\'ri' : '❌ Noto\'g\'ri';
+    }
+  });
+  document.getElementById('scoreText').textContent = correct + ' / ' + total;
+  document.getElementById('pTotal').textContent = total;
+  document.getElementById('pCorrect').textContent = correct;
+  const pct = total > 0 ? Math.round(correct / total * 100) : 0;
+  document.getElementById('pPct').textContent = pct + '%';
+  document.getElementById('mainBar').style.width = pct + '%';
+  document.getElementById('progLabel').textContent =
+    pct >= 90 ? "🏆 A'lo — mukammal natija!" :
+    pct >= 75 ? "👍 Yaxshi — davom eting!" :
+    pct >= 60 ? "📘 Qoniqarli — ko'proq mashq qiling." :
+    total > 0 ? "💪 Qayta o'rganish tavsiya etiladi." :
+    "Topshiriqlarni bajaring va natijalarni kuzating.";
+}
+
+/* ══════════════════════════════
+   GLOSSARY
+══════════════════════════════ */
+const glossData = [
+  { term: "Epyur", def: "Jismning uch proyeksiyasini (frontal, gorizontal, profil) bitta tekislikda joylashtirilgan grafik tasviri." },
+  { term: "Proyeksiya", def: "Jismning nur yoki ko'z nurlarini shartli tekislikka tushirib olingan tasviri (ortogonal yoki markaziy)." },
+  { term: "Frontal tekislik (V)", def: "Chizuvchiga to'g'ri qarab turgan asosiy proyeksiya tekisligi. Olddan ko'rinish (fasad) shu tekislikda olinadi." },
+  { term: "Gorizontal tekislik (H)", def: "Gorizontal joylashgan proyeksiya tekisligi. Yuqoridan ko'rinish (plan) shu tekislikda olinadi." },
+  { term: "Profil tekislik (W)", def: "O'ng tomondan joylashgan proyeksiya tekisligi. O'ngdan ko'rinish (profil) shu tekislikda olinadi." },
+  { term: "Aksonometriya", def: "Jismni uch o'lchovli ko'rinishda bitta tekislikda tasvirlash usuli (izometriya, dimetriya, kabinetli proyeksiya)." },
+  { term: "Izometriya", def: "Aksonometriyaning bir turi bo'lib, uchala o'q o'rtasidagi burchak 120° ga teng bo'lib, koeffitsient ≈0.82 (amalda 1)." },
+  { term: "Dimetriya", def: "Ikki o'qi teng, uchinchisi (Y) 0.5 masshtabda tasvirlangan aksonometrik proyeksiya; X=7°, Z=41° burchaklarda." },
+  { term: "Qirqim (razrez)", def: "Jismni shartli ravishda tekislik bilan kesib, ichki tuzilishni ko'rsatuvchi tasvir; kesim tekisligi chiziladi va shtrixlanadi." },
+  { term: "Kesim (sechenie)", def: "Qirqimdan farqli o'laroq, faqat kesmish tekisligi bilan kesishgan qismni tasvirlovchi shakl." },
+  { term: "Shtrixlash", def: "Qirqim va kesimda materialning turini ko'rsatish uchun ishlatiladigan parallel qiyshiq chiziqlar (metall uchun 45°)." },
+  { term: "Masshtab", def: "Chizmadagi o'lchamning haqiqiy o'lchamga nisbati. M=l_ch/l_haq. Standart: 1:1, 1:2, 2:1 va boshqalar." },
+  { term: "Kontur chizig'i", def: "Detalning ko'rinadigan qirralarini tasvirlash uchun ishlatiladigan asosiy qo'yiq chiziq (S=0.5–1.4 mm)." },
+  { term: "O'q chizig'i", def: "Simmetriya o'qlarini ko'rsatuvchi shtrix-nuqtali ingichka chiziq (S/2 qalinlik)." },
+  { term: "Ko'rinmas kontur", def: "Jismning ko'rinmaydigan qirralari tasvirlanadigan shtrix (uzilgan) chiziq; S/2 qalinlik." },
+  { term: "Rezba (thread)", def: "Vintli yuzada joylashgan spiralsimon yiv. Metrik rezba: M20×2.5, profil burchagi 60°." },
+  { term: "GOST", def: "Gosudarstvennyy standart — Davlat standarti. Muhandislik chizmachiliğida GOST 2.xxx qatorlari qo'llaniladi." },
+  { term: "Shtamp (unglov)", def: "Chizmaning pastki o'ng burchagidagi jadval; detalning nomi, masshtabi, materiallar va muallif ma'lumotlari yoziladi." },
+  { term: "Epyur o'qi", def: "Proyeksiya tekisliklarining kesishish chiziqlari — x12, x13, z23 o'qlar; epyurni tuzishda asos bo'ladi." },
+  { term: "AutoCAD", def: "Muhandislik va arxitektura chizmalarini kompyuterda yaratish uchun ishlatiladigan professional CAD dasturi (Autodesk)." },
+  { term: "KOMPAS-3D", def: "Rus tilida ishlaydigan 3D-modellashtirish va chizma yaratish dasturi; Rossiya va O'zbekiston oliy ta'limida keng qo'llaniladi." },
+  { term: "Parametrik modellashtirish", def: "3D modelni o'lchamlar va cheklovlar (parametrlar) orqali boshqarish usuli; parametr o'zgarganda model avtomatik yangilanadi." },
+];
+
+function buildGloss(filter) {
+  const dl = document.getElementById('glossList');
+  dl.innerHTML = '';
+  const q = (filter || '').toLowerCase();
+  glossData.filter(g => !q || g.term.toLowerCase().includes(q) || g.def.toLowerCase().includes(q))
+    .forEach(g => {
+      const item = document.createElement('div');
+      item.className = 'gloss-item';
+      item.innerHTML = `<dt>${g.term}</dt><dd>${g.def}</dd>`;
+      dl.appendChild(item);
+    });
+}
+function filterGloss(v) { buildGloss(v); }
+buildGloss();
+</script>
+</body>
+</html>
